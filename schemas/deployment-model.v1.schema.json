@@ -1,0 +1,244 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "source_sha256",
+    "platform",
+    "services"
+  ],
+  "properties": {
+    "schema": {
+      "const": "durkahelper.deployment-model.v1"
+    },
+    "source_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "platform": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "os",
+        "architecture",
+        "runtime"
+      ],
+      "properties": {
+        "os": {
+          "enum": [
+            "linux",
+            "darwin"
+          ]
+        },
+        "architecture": {
+          "enum": [
+            "amd64",
+            "arm64"
+          ]
+        },
+        "runtime": {
+          "enum": [
+            "docker-engine",
+            "docker-desktop"
+          ]
+        }
+      }
+    },
+    "services": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "role",
+          "image",
+          "architectures",
+          "mode",
+          "ports",
+          "mounts",
+          "privileged",
+          "network_mode",
+          "capabilities",
+          "nonroot",
+          "healthcheck",
+          "memory_limit_mb",
+          "cpu_limit",
+          "restart"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_.-]{0,63}$"
+          },
+          "role": {
+            "enum": [
+              "ui",
+              "api",
+              "backend",
+              "worker",
+              "capture"
+            ]
+          },
+          "image": {
+            "type": "string",
+            "maxLength": 256,
+            "pattern": "^[a-z0-9][a-z0-9._/:@-]*$"
+          },
+          "architectures": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "amd64",
+                "arm64"
+              ]
+            },
+            "maxItems": 2,
+            "uniqueItems": true
+          },
+          "mode": {
+            "enum": [
+              "none",
+              "file",
+              "live"
+            ]
+          },
+          "ports": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "host_port",
+                "container_port",
+                "protocol",
+                "host_ip"
+              ],
+              "properties": {
+                "host_port": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 65535
+                },
+                "container_port": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 65535
+                },
+                "protocol": {
+                  "enum": [
+                    "tcp",
+                    "udp"
+                  ]
+                },
+                "host_ip": {
+                  "type": "string",
+                  "maxLength": 45
+                }
+              }
+            },
+            "maxItems": 128
+          },
+          "mounts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "kind",
+                "target",
+                "source_scope",
+                "read_only"
+              ],
+              "properties": {
+                "kind": {
+                  "enum": [
+                    "bind",
+                    "volume",
+                    "tmpfs"
+                  ]
+                },
+                "target": {
+                  "type": "string",
+                  "maxLength": 1024,
+                  "pattern": "^/"
+                },
+                "source_scope": {
+                  "enum": [
+                    "approved-data",
+                    "approved-config",
+                    "outside",
+                    "socket",
+                    "host-root",
+                    "unknown"
+                  ]
+                },
+                "read_only": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "maxItems": 64
+          },
+          "privileged": {
+            "type": "boolean"
+          },
+          "network_mode": {
+            "enum": [
+              "bridge",
+              "host",
+              "none"
+            ]
+          },
+          "capabilities": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^(CAP_)?[A-Z][A-Z0-9_]{0,63}$"
+            },
+            "maxItems": 64
+          },
+          "nonroot": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "healthcheck": {
+            "type": "boolean"
+          },
+          "memory_limit_mb": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 1,
+            "maximum": 1048576
+          },
+          "cpu_limit": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "exclusiveMinimum": 0,
+            "maximum": 1024
+          },
+          "restart": {
+            "enum": [
+              "no",
+              "always",
+              "on-failure",
+              "unless-stopped"
+            ]
+          }
+        }
+      },
+      "maxItems": 64,
+      "minItems": 1
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:durkahelper:schema:deployment-model:v1",
+  "title": "Declared deployment metadata; never runtime proof",
+  "$comment": "Runtime additionally requires canonical literal IPs, unique service ids, safe mount paths, and no secret or command fields."
+}

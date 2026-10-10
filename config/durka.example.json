@@ -1,0 +1,26 @@
+{
+  "schema": "durkahelper.operator.v1",
+  "paths": {"sources": "local/sources", "workspace": "local/workspace"},
+  "profile": {
+    "schema": "durkahelper.deployment-profile.v1",
+    "platform": {"os": "darwin", "architecture": "arm64", "runtime": "docker-desktop"},
+    "bind_address": "127.0.0.1",
+    "ports": {"farm": 8080, "neo": 5005, "packmate": 65000},
+    "allow_amd64_emulation": true,
+    "farm": {
+      "teams": {"Example": "192.0.2.1"},
+      "flag_format": "[A-Z0-9]{31}=",
+      "protocol": "ructf_http",
+      "protocol_settings": {"SYSTEM_URL": "http://receiver.example.invalid/flags", "SYSTEM_TOKEN": "REPLACE_WITH_COMPETITION_TOKEN"},
+      "submit_limit": 10, "submit_period": 2, "flag_lifetime": 300
+    },
+    "packmate": {"mode": "FILE", "local_ip": "192.0.2.1", "pcap_file": "capture.pcap", "interface": "", "retention_minutes": 60}
+  },
+  "credentials": {
+    "farm_password": "REPLACE_GENERATED_BY_INIT",
+    "database_password": "REPLACE_GENERATED_BY_INIT",
+    "neo_key": "REPLACE_GENERATED_BY_INIT",
+    "packmate_user": "operator",
+    "packmate_password": "REPLACE_GENERATED_BY_INIT"
+  }
+}

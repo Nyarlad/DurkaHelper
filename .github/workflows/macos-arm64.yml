@@ -1,0 +1,208 @@
+name: macOS ARM64 validation
+
+on:
+  workflow_dispatch:
+    inputs:
+      synthetic_pcap_base64:
+        description: Optional closed synthetic PCAP (base64, <=32 KiB; never real traffic)
+        required: false
+        default: ''
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: macos-arm64-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: macOS 15 ARM64 / Python 3.10.11
+    runs-on: macos-15
+    timeout-minutes: 15
+    defaults:
+      run:
+        shell: bash
+    env:
+      PYTHONUTF8: "1"
+      PYTHONDONTWRITEBYTECODE: "1"
+    steps:
+      - name: Require an ARM64 runner
+        run: |
+          set -euo pipefail
+          test "$(uname -m)" = "arm64"
+
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Python 3.10.11 ARM64
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.10.11"
+          architecture: arm64
+          check-latest: false
+
+      - name: Install pinned ripgrep ARM64 in the job directory
+        run: |
+          set -euo pipefail
+          rg_root="ripgrep-15.1.0-aarch64-apple-darwin"
+          rg_dir="$(mktemp -d "$RUNNER_TEMP/durkahelper-ripgrep.XXXXXX")"
+          curl --fail --silent --show-error --location --proto '=https' \
+            --connect-timeout 10 --max-time 120 --retry 2 --max-filesize 5242880 \
+            --output "$rg_dir/release.tar.gz" \
+            "https://github.com/BurntSushi/ripgrep/releases/download/15.1.0/$rg_root.tar.gz"
+          python -c 'import hashlib, pathlib, sys; archive = pathlib.Path(sys.argv[1]); assert archive.stat().st_size <= 5242880; assert hashlib.sha256(archive.read_bytes()).hexdigest() == "378e973289176ca0c6054054ee7f631a065874a352bf43f0fa60ef079b6ba715", "ripgrep release checksum mismatch"' "$rg_dir/release.tar.gz"
+          tar -xzf "$rg_dir/release.tar.gz" -C "$rg_dir" "$rg_root/rg"
+          test -x "$rg_dir/$rg_root/rg"
+          "$rg_dir/$rg_root/rg" --version
+          printf '%s\n' "$rg_dir/$rg_root" >> "$GITHUB_PATH"
+
+      - name: Verify runtime prerequisites
+        run: |
+          set -euo pipefail
+          python -c 'import platform, sys; assert sys.version_info[:3] == (3, 10, 11), sys.version; assert platform.machine() == "arm64", platform.machine()'
+          command -v rg
+          rg --version
+          python -c 'import subprocess; import re; version = subprocess.check_output(["rg", "--version"], text=True).splitlines()[0]; assert re.fullmatch(r"ripgrep 15\.1\.0(?: \(rev [0-9a-f]+\))?", version), version'
+
+      - name: Run Defense unit tests
+        run: |
+          set -euo pipefail
+          python -m unittest discover -s tests -p 'test_*.py' -v 2>&1 | tee "$RUNNER_TEMP/unittest.log"
+          if rg -n ' \.\.\. skipped |^OK \(skipped=' "$RUNNER_TEMP/unittest.log"; then
+            echo "macOS acceptance forbids skipped tests" >&2
+            exit 1
+          fi
+
+      - name: Smoke-test current command-line tools
+        run: |
+          set -euo pipefail
+
+          test "$(python -X utf8 -I -S scripts/defense_scan.py --version)" = "1.8.0"
+          test "$(python -X utf8 -I -S scripts/defense_ops.py --version)" = "2.2.0"
+          # http_probe imports the adjacent, tracked common.py helper.
+          python -X utf8 -E -s -S scripts/http_probe.py --help > /dev/null
+          python -X utf8 -I -S scripts/defense_diff.py --help > /dev/null
+          python -X utf8 -I -S durka.py --help > /dev/null
+          python -X utf8 -I -S durka.py doctor --help > /dev/null
+          # Hosted CI has no prepared Desktop stack/config/client. BLOCKED is
+          # expected; only the actual native host and sanitized report are checked.
+          set +e
+          python -X utf8 -I -S durka.py doctor --json > "$RUNNER_TEMP/doctor.json"
+          doctor_status=$?
+          set -e
+          test "$doctor_status" -eq 2
+          python -c 'import json, sys; data = json.load(open(sys.argv[1], encoding="utf-8")); checks = {r["check"]: r["status"] for r in data["checks"]}; assert data["read_only"] is True and data["competition_ready"] is False; assert checks["macOS ARM64"] == "READY" and checks["Python"] == "READY"; assert data["status"] == "BLOCKED"' "$RUNNER_TEMP/doctor.json"
+          python -X utf8 -I -S scripts/log_summary.py --help > /dev/null
+          python -X utf8 -I -S scripts/backup_config.py --help > /dev/null
+          python -X utf8 -I -S scripts/toolchain_bundle.py --help > /dev/null
+          python -X utf8 -I -S scripts/toolchain_inventory.py --help > /dev/null
+          python -X utf8 -I -S deployment/recovery_activation.py --help > /dev/null
+          python -X utf8 -I -S deployment/packmate_host.py --help > /dev/null
+          python -X utf8 -I -S deployment/packmate_file.py --help > /dev/null
+          python -X utf8 -I -S deployment/toolkit.py --help > /dev/null
+          python -X utf8 -I -S scripts/scanner_coverage.py --check
+          python -X utf8 -I -S scripts/publication_check.py --allowlist config/publication-allowlist.json
+
+          python -X utf8 -I -S scripts/defense_scan.py --list-rules > "$RUNNER_TEMP/rules.txt"
+          python -c 'import pathlib, sys; assert len(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8").splitlines()) == 174' "$RUNNER_TEMP/rules.txt"
+
+          python -X utf8 -I -S scripts/defense_scan.py --explain PY-EVAL > "$RUNNER_TEMP/explain.json"
+          python -c 'import json, sys; data = json.load(open(sys.argv[1], encoding="utf-8")); assert data["id"] == "PY-EVAL"' "$RUNNER_TEMP/explain.json"
+
+          set +e
+          python -X utf8 -I -S scripts/defense_scan.py lab --context config/scanner-context.example.json --json > "$RUNNER_TEMP/scan.json"
+          scan_status=$?
+          set -e
+          test "$scan_status" -eq 0 || test "$scan_status" -eq 1
+          python -c 'import json, sys; data = json.load(open(sys.argv[1], encoding="utf-8")); assert data["tool"] == "DurkaHelper defense_scan"; assert data["offline"] is True; assert data["partial"] is False' "$RUNNER_TEMP/scan.json"
+
+          python -X utf8 -I -S scripts/defense_diff.py "$RUNNER_TEMP/scan.json" "$RUNNER_TEMP/scan.json" --json > "$RUNNER_TEMP/diff.json"
+          python -c 'import json, sys; data = json.load(open(sys.argv[1], encoding="utf-8")); assert data["tool"] == "DurkaHelper defense_diff"; assert data["exit_code"] == 0' "$RUNNER_TEMP/diff.json"
+
+          ops_dir="$RUNNER_TEMP/defense-ops-source"
+          mkdir -p "$ops_dir"
+          python -X utf8 -I -S scripts/defense_ops.py preflight \
+            --profile config/defense-profile.example.json > "$ops_dir/preflight.json"
+          python -X utf8 -I -S scripts/defense_ops.py snapshot \
+            --profile config/defense-profile.example.json \
+            --root . \
+            --output "$ops_dir/snapshot.json" > "$ops_dir/snapshot-command.json"
+          python -X utf8 -I -S scripts/defense_ops.py compare \
+            "$ops_dir/snapshot.json" "$ops_dir/snapshot.json" > "$ops_dir/comparison.json"
+          python -c 'import json, pathlib, sys; root = pathlib.Path(sys.argv[1]); preflight = json.loads((root / "preflight.json").read_text(encoding="utf-8")); snapshot = json.loads((root / "snapshot.json").read_text(encoding="utf-8")); comparison = json.loads((root / "comparison.json").read_text(encoding="utf-8")); assert preflight["exit_code"] == 0 and preflight["partial"] is False; assert snapshot["partial"] is False; assert comparison["exit_code"] == 0 and comparison["comparable"] is True and comparison["summary"]["drift_count"] == 0' "$ops_dir"
+
+      - name: Exercise synthetic Vulnbox file handoff and Docker review
+        run: |
+          set -euo pipefail
+          # Read event JSON in Python, never interpolate input into shell code.
+          # No SSH, private VM connection, Docker runtime or capture privileges.
+          python -X utf8 -I -S integration/vulnbox_handoff.py --event "$GITHUB_EVENT_PATH"
+
+      - name: Build and smoke-test required offline bundle
+        run: |
+          set -euo pipefail
+
+          test -f scripts/build_offline_bundle.py
+          bundle="$RUNNER_TEMP/durkahelper-offline.tar.gz"
+          extract_dir="$RUNNER_TEMP/durkahelper-offline"
+          python scripts/build_offline_bundle.py --output "$bundle"
+          test -s "$bundle"
+          python scripts/build_offline_bundle.py --verify "$bundle"
+
+          mkdir -p "$extract_dir"
+          tar -xzf "$bundle" -C "$extract_dir"
+          scanner_path="$(python -c 'import pathlib, sys; paths = list(pathlib.Path(sys.argv[1]).rglob("scripts/defense_scan.py")); assert len(paths) == 1, paths; print(paths[0])' "$extract_dir")"
+          bundle_root="$(python -c 'import pathlib, sys; print(pathlib.Path(sys.argv[1]).resolve().parents[1])' "$scanner_path")"
+
+          test -f "$bundle_root/rules/defense.json"
+          (
+            cd "$bundle_root"
+            test ! -e .git
+            python -m unittest discover -s tests -p 'test_*.py' -v 2>&1 | tee "$RUNNER_TEMP/bundle-unittest.log"
+            if rg -n ' \.\.\. skipped |^OK \(skipped=' "$RUNNER_TEMP/bundle-unittest.log"; then
+              echo "macOS offline-bundle acceptance forbids skipped tests" >&2
+              exit 1
+            fi
+            test "$(python -X utf8 -I -S scripts/defense_scan.py --version)" = "1.8.0"
+            test "$(python -X utf8 -I -S scripts/defense_ops.py --version)" = "2.2.0"
+            python -X utf8 -I -S scripts/scanner_coverage.py --check
+            python -X utf8 -I -S scripts/defense_scan.py --list-rules > "$RUNNER_TEMP/bundle-rules.txt"
+            python -c 'import pathlib, sys; assert len(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8").splitlines()) == 174' "$RUNNER_TEMP/bundle-rules.txt"
+
+            bundle_ops_dir="$RUNNER_TEMP/defense-ops-bundle"
+            mkdir -p "$bundle_ops_dir"
+            python -X utf8 -I -S scripts/defense_ops.py preflight \
+              --profile config/defense-profile.example.json > "$bundle_ops_dir/preflight.json"
+            python -X utf8 -I -S scripts/defense_ops.py snapshot \
+              --profile config/defense-profile.example.json \
+              --root . \
+              --output "$bundle_ops_dir/snapshot.json" > "$bundle_ops_dir/snapshot-command.json"
+            python -X utf8 -I -S scripts/defense_ops.py compare \
+              "$bundle_ops_dir/snapshot.json" "$bundle_ops_dir/snapshot.json" > "$bundle_ops_dir/comparison.json"
+            python -c 'import json, pathlib, sys; root = pathlib.Path(sys.argv[1]); preflight = json.loads((root / "preflight.json").read_text(encoding="utf-8")); snapshot = json.loads((root / "snapshot.json").read_text(encoding="utf-8")); comparison = json.loads((root / "comparison.json").read_text(encoding="utf-8")); assert preflight["exit_code"] == 0 and preflight["partial"] is False; assert snapshot["partial"] is False; assert comparison["exit_code"] == 0 and comparison["comparable"] is True and comparison["summary"]["drift_count"] == 0' "$bundle_ops_dir"
+          )
+
+      - name: Record validation evidence
+        if: ${{ always() }}
+        env:
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          architecture="$(uname -m)"
+          python_version="$(python --version 2>&1 || true)"
+          ripgrep_version="$(rg --version 2>/dev/null | head -n 1 || true)"
+          {
+            echo '## macOS ARM64 validation evidence'
+            echo
+            echo '| Field | Value |'
+            echo '|---|---|'
+            printf '| Run | [%s](%s) |\n' "$GITHUB_RUN_ID" "$RUN_URL"
+            printf '| Commit | `%s` |\n' "$GITHUB_SHA"
+            printf '| Architecture | `%s` |\n' "$architecture"
+            printf '| Python | `%s` |\n' "${python_version:-unavailable}"
+            printf '| ripgrep | `%s` |\n' "${ripgrep_version:-unavailable}"
+            printf '| Runner image | `%s` / `%s` |\n' "${ImageOS:-unknown}" "${ImageVersion:-unknown}"
+          } >> "$GITHUB_STEP_SUMMARY"

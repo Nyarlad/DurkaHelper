@@ -1,0 +1,1410 @@
+{
+  "schema_version": 1,
+  "description": "Independent scanner 1.8.0 boundary regressions. Inert sources, never imported or executed. Negative helper examples mean no direct signal, NOT proven safe redaction.",
+  "cases": [
+    {
+      "id": "boundary-psycopg-raw-1",
+      "language": "python",
+      "source": "from psycopg import sql as compose\ncur.execute(compose.SQL(request.args['statement']))",
+      "expected": [
+        "PY-SQL"
+      ],
+      "forbidden": []
+    },
+    {
+      "id": "boundary-psycopg-raw-2",
+      "language": "python",
+      "source": "from psycopg2.sql import SQL as Raw\ncursor.executemany(query=Raw(payload), vars=rows)",
+      "expected": [
+        "PY-SQL"
+      ],
+      "forbidden": []
+    },
+    {
+      "id": "boundary-psycopg-raw-3",
+      "language": "python",
+      "source": "from psycopg import sql\ncur.execute(sql.SQL('SELECT * FROM {}').format(sql.SQL(table_name)))",
+      "expected": [
+        "PY-SQL"
+      ],
+      "forbidden": []
+    },
+    {
+      "id": "boundary-psycopg-raw-4",
+      "language": "python",
+      "source": "from psycopg2 import sql\nquery = sql.SQL('SELECT {}').format(sql.SQL(request.args['column']))\ncur.execute(query)",
+      "expected": [
+        "PY-SQL"
+      ],
+      "forbidden": []
+    },
+    {
+      "id": "boundary-psycopg-raw-5",
+      "language": "python",
+      "source": "from psycopg import sql\nquery = sql.SQL(query_text)\ncur.execute(query)",
+      "expected": [
+        "PY-SQL"
+      ],
+      "forbidden": []
+    },
+    {
+      "id": "boundary-psycopg-raw-6",
+      "language": "python",
+      "source": "from psycopg2 import sql\ncur.execute(sql.SQL('SELECT {}').format(unknown_piece))",
+      "expected": [
+        "PY-SQL"
+      ],
+      "forbidden": []
+    },
+    {
+      "id": "boundary-psycopg-raw-7",
+      "language": "python",
+      "source": "from psycopg import sql\ncur.execute(sql.SQL('SELECT ') + sql.SQL(request.args['column']))",
+      "expected": [
+        "PY-SQL"
+      ],
+      "forbidden": []
+    },
+    {
+      "id": "boundary-psycopg-raw-8",
+      "language": "python",
+      "source": "from psycopg2 import sql\ncur.execute(sql.SQL(',').join([sql.SQL(user_text), sql.Identifier('fixed')]))",
+      "expected": [
+        "PY-SQL"
+      ],
+      "forbidden": []
+    },
+    {
+      "id": "boundary-psycopg-quoted-9",
+      "language": "python",
+      "source": "from psycopg import sql\ncur.execute(sql.SQL('SELECT * FROM {} WHERE id=%s').format(sql.Identifier(table)), (note_id,))",
+      "expected": [],
+      "forbidden": [
+        "PY-SQL"
+      ]
+    },
+    {
+      "id": "boundary-psycopg-quoted-10",
+      "language": "python",
+      "source": "from psycopg2.sql import SQL, Literal\ncur.execute(SQL('SELECT {}').format(Literal(value)))",
+      "expected": [],
+      "forbidden": [
+        "PY-SQL"
+      ]
+    },
+    {
+      "id": "boundary-psycopg-quoted-11",
+      "language": "python",
+      "source": "import psycopg.sql as q\ncur.execute(q.SQL('SELECT {}').format(q.Placeholder('value')), {'value': value})",
+      "expected": [],
+      "forbidden": [
+        "PY-SQL"
+      ]
+    },
+    {
+      "id": "boundary-psycopg-quoted-12",
+      "language": "python",
+      "source": "from psycopg2 import sql\nstatement = sql.SQL('SELECT {}').format(sql.Identifier(column))\ncur.execute(statement)",
+      "expected": [],
+      "forbidden": [
+        "PY-SQL"
+      ]
+    },
+    {
+      "id": "boundary-psycopg-quoted-13",
+      "language": "python",
+      "source": "from psycopg import sql\ncur.execute(sql.SQL(',').join([sql.Identifier('a'), sql.Identifier('b')]))",
+      "expected": [],
+      "forbidden": [
+        "PY-SQL"
+      ]
+    },
+    {
+      "id": "boundary-psycopg-quoted-14",
+      "language": "python",
+      "source": "from psycopg2 import sql\ncur.execute(sql.SQL('SELECT ') + sql.Identifier(column))",
+      "expected": [],
+      "forbidden": [
+        "PY-SQL"
+      ]
+    },
+    {
+      "id": "boundary-psycopg-quoted-15",
+      "language": "python",
+      "source": "from psycopg.sql import SQL\nSQL = custom_sql\ncur.execute(SQL(payload))",
+      "expected": [],
+      "forbidden": [
+        "PY-SQL"
+      ]
+    },
+    {
+      "id": "boundary-psycopg-quoted-16",
+      "language": "python",
+      "source": "from psycopg import sql\ndef work(sql):\n    cur.execute(sql.SQL(payload))",
+      "expected": [],
+      "forbidden": [
+        "PY-SQL"
+      ]
+    },
+    {
+      "id": "boundary-psycopg-quoted-17",
+      "language": "python",
+      "source": "def SQL(value):\n    return value\ncur.execute(SQL(payload))",
+      "expected": [],
+      "forbidden": [
+        "PY-SQL"
+      ]
+    },
+    {
+      "id": "boundary-psycopg-quoted-18",
+      "language": "python",
+      "source": "# cur.execute(sql.SQL(payload))\nexample = \"cur.execute(SQL(payload))\"",
+      "expected": [],
+      "forbidden": [
+        "PY-SQL"
+      ]
+    },
+    {
+      "id": "boundary-flask-debug-19",
+      "language": "python",
+      "source": "from flask import Flask as Web\napp=Web('service')\napp.config['DEBUG'] = True",
+      "expected": [
+        "PY-DEBUG"
+      ],
+      "forbidden": []
+    },
+    {
+      "id": "boundary-flask-debug-20",
+      "language": "python",
+      "source": "import flask as f\nsite=f.Flask('one')\nsite.config.update({'DEBUG': True})",
+      "expected": [
+        "PY-DEBUG"
+      ],
+      "forbidden": []
+    },
+    {
+      "id": "boundary-flask-debug-21",
+      "language": "python",
+      "source": "from flask import Flask\napp=Flask('demo')\napp.config.from_mapping(DEBUG=True)",
+      "expected": [
+        "PY-DEBUG"
+      ],
+      "forbidden": []
+    },
+    {
+      "id": "boundary-flask-debug-22",
+      "language": "python",
+      "source": "import flask\nweb=flask.Flask('demo')\nweb.debug=True",
+      "expected": [
+        "PY-DEBUG"
+      ],
+      "forbidden": []
+    },
+    {
+      "id": "boundary-flask-debug-23",
+      "language": "python",
+      "source": "from flask import Flask\napp=Flask('sample')\napp.config.update(DEBUG=True)",
+      "expected": [
+        "PY-DEBUG"
+      ],
+      "forbidden": []
+    },
+    {
+      "id": "boundary-flask-debug-24",
+      "language": "python",
+      "source": "import flask as framework\nsite=framework.Flask('second')\nsite.config.from_mapping({'DEBUG': True})",
+      "expected": [
+        "PY-DEBUG"
+      ],
+      "forbidden": []
+    },
+    {
+      "id": "boundary-flask-debug-safe-25",
+      "language": "python",
+      "source": "from flask import Flask\napp=Flask('service')\napp.config['DEBUG']=False",
+      "expected": [],
+      "forbidden": [
+        "PY-DEBUG"
+      ]
+    },
+    {
+      "id": "boundary-flask-debug-safe-26",
+      "language": "python",
+      "source": "import flask\napp=flask.Flask('service')\napp.config.from_mapping({'DEBUG':False})\napp.debug=False",
+      "expected": [],
+      "forbidden": [
+        "PY-DEBUG"
+      ]
+    },
+    {
+      "id": "boundary-flask-debug-safe-27",
+      "language": "python",
+      "source": "app=CustomApp()\napp.config['DEBUG']=True",
+      "expected": [],
+      "forbidden": [
+        "PY-DEBUG"
+      ]
+    },
+    {
+      "id": "boundary-flask-debug-safe-28",
+      "language": "python",
+      "source": "from flask import Flask\napp=Flask('service')\napp=safe_app\napp.config['DEBUG']=True",
+      "expected": [],
+      "forbidden": [
+        "PY-DEBUG"
+      ]
+    },
+    {
+      "id": "boundary-flask-debug-safe-29",
+      "language": "python",
+      "source": "from flask import Flask\ndef work(Flask):\n    app=Flask('service')\n    app.debug=True",
+      "expected": [],
+      "forbidden": [
+        "PY-DEBUG"
+      ]
+    },
+    {
+      "id": "boundary-flask-debug-safe-30",
+      "language": "python",
+      "source": "from flask import Flask\napp=Flask('service')\napp.config.update({'DEBUG':True}, DEBUG=False)",
+      "expected": [],
+      "forbidden": [
+        "PY-DEBUG"
+      ]
+    },
+    {
+      "id": "boundary-flask-debug-safe-31",
+      "language": "python",
+      "source": "from flask import Flask\napp=Flask('service')\napp.config.from_mapping({'DEBUG':True}, **unknown)",
+      "expected": [],
+      "forbidden": [
+        "PY-DEBUG"
+      ]
+    },
+    {
+      "id": "boundary-flask-debug-safe-32",
+      "language": "python",
+      "source": "# app.config['DEBUG']=True\nsample=\"app.debug=True\"",
+      "expected": [],
+      "forbidden": [
+        "PY-DEBUG"
+      ]
+    },
+    {
+      "id": "boundary-flask-cookie-33",
+      "language": "python",
+      "source": "from flask import Flask\napp=Flask('service')\napp.config['SESSION_COOKIE_HTTPONLY']=False",
+      "expected": [
+        "CFG-COOKIE-FLAGS"
+      ],
+      "forbidden": []
+    },
+    {
+      "id": "boundary-flask-cookie-34",
+      "language": "python",
+      "source": "import flask as f\nsite=f.Flask('one')\nsite.config.update({'SESSION_COOKIE_HTTPONLY':False})",
+      "expected": [
+        "CFG-COOKIE-FLAGS"
+      ],
+      "forbidden": []
+    },
+    {
+      "id": "boundary-flask-cookie-35",
+      "language": "python",
+      "source": "from flask import Flask\napp=Flask('demo')\napp.config.from_mapping({'SESSION_COOKIE_SECURE':False})",
+      "expected": [
+        "CFG-COOKIE-FLAGS"
+      ],
+      "forbidden": []
+    },
+    {
+      "id": "boundary-flask-cookie-36",
+      "language": "python",
+      "source": "import flask\nweb=flask.Flask('demo')\nweb.config['SESSION_COOKIE_SECURE']=False",
+      "expected": [
+        "CFG-COOKIE-FLAGS"
+      ],
+      "forbidden": []
+    },
+    {
+      "id": "boundary-flask-cookie-safe-37",
+      "language": "python",
+      "source": "from flask import Flask\napp=Flask('service')\napp.config['SESSION_COOKIE_HTTPONLY']=True",
+      "expected": [],
+      "forbidden": [
+        "CFG-COOKIE-FLAGS"
+      ]
+    },
+    {
+      "id": "boundary-flask-cookie-safe-38",
+      "language": "python",
+      "source": "import flask\napp=flask.Flask('service')\napp.config.update({'SESSION_COOKIE_SECURE':True})",
+      "expected": [],
+      "forbidden": [
+        "CFG-COOKIE-FLAGS"
+      ]
+    },
+    {
+      "id": "boundary-flask-cookie-safe-39",
+      "language": "python",
+      "source": "settings={'SESSION_COOKIE_HTTPONLY':False}",
+      "expected": [],
+      "forbidden": [
+        "CFG-COOKIE-FLAGS"
+      ]
+    },
+    {
+      "id": "boundary-flask-cookie-safe-40",
+      "language": "python",
+      "source": "app=CustomApp()\napp.config['SESSION_COOKIE_HTTPONLY']=False",
+      "expected": [],
+      "forbidden": [
+        "CFG-COOKIE-FLAGS"
+      ]
+    },
+    {
+      "id": "boundary-flask-cookie-safe-41",
+      "language": "python",
+      "source": "from flask import Flask\napp=Flask('demo')\napp=CustomApp()\napp.config['SESSION_COOKIE_HTTPONLY']=False",
+      "expected": [],
+      "forbidden": [
+        "CFG-COOKIE-FLAGS"
+      ]
+    },
+    {
+      "id": "boundary-flask-cookie-safe-42",
+      "language": "python",
+      "source": "from flask import Flask\napp=Flask('service')\napp.config.update({'SESSION_COOKIE_HTTPONLY':False}, **unknown)",
+      "expected": [],
+      "forbidden": [
+        "CFG-COOKIE-FLAGS"
+      ]
+    },
+    {
+      "id": "boundary-auth-put-43",
+      "language": "python",
+      "source": "from flask import Flask\nfrom flask_login import login_required\nweb=Flask('x')\n@login_required\n@web.put('/item')\ndef update():\n    pass",
+      "expected": [
+        "PY-AUTH-DECORATOR"
+      ],
+      "forbidden": []
+    },
+    {
+      "id": "boundary-auth-put-44",
+      "language": "python",
+      "source": "import flask as f\nfrom flask_login import login_required as protect\nbp=f.Blueprint('items', __name__)\n@protect\n@bp.put('/items')\ndef work():\n    pass",
+      "expected": [
+        "PY-AUTH-DECORATOR"
+      ],
+      "forbidden": []
+    },
+    {
+      "id": "boundary-auth-safe-put-45",
+      "language": "python",
+      "source": "from flask import Flask\nfrom flask_login import login_required\nweb=Flask('x')\n@web.put('/item')\n@login_required\ndef update():\n    pass",
+      "expected": [],
+      "forbidden": [
+        "PY-AUTH-DECORATOR"
+      ]
+    },
+    {
+      "id": "boundary-auth-safe-put-46",
+      "language": "python",
+      "source": "from flask_login import login_required\napp=CustomRouter()\n@login_required\n@app.put('/x')\ndef work():\n    pass",
+      "expected": [],
+      "forbidden": [
+        "PY-AUTH-DECORATOR"
+      ]
+    },
+    {
+      "id": "boundary-auth-patch-47",
+      "language": "python",
+      "source": "from flask import Flask\nfrom flask_login import login_required\nweb=Flask('x')\n@login_required\n@web.patch('/item')\ndef update():\n    pass",
+      "expected": [
+        "PY-AUTH-DECORATOR"
+      ],
+      "forbidden": []
+    },
+    {
+      "id": "boundary-auth-patch-48",
+      "language": "python",
+      "source": "import flask as f\nfrom flask_login import login_required as protect\nbp=f.Blueprint('items', __name__)\n@protect\n@bp.patch('/items')\ndef work():\n    pass",
+      "expected": [
+        "PY-AUTH-DECORATOR"
+      ],
+      "forbidden": []
+    },
+    {
+      "id": "boundary-auth-safe-patch-49",
+      "language": "python",
+      "source": "from flask import Flask\nfrom flask_login import login_required\nweb=Flask('x')\n@web.patch('/item')\n@login_required\ndef update():\n    pass",
+      "expected": [],
+      "forbidden": [
+        "PY-AUTH-DECORATOR"
+      ]
+    },
+    {
+      "id": "boundary-auth-safe-patch-50",
+      "language": "python",
+      "source": "from flask_login import login_required\napp=CustomRouter()\n@login_required\n@app.patch('/x')\ndef work():\n    pass",
+      "expected": [],
+      "forbidden": [
+        "PY-AUTH-DECORATOR"
+      ]
+    },
+    {
+      "id": "boundary-auth-delete-51",
+      "language": "python",
+      "source": "from flask import Flask\nfrom flask_login import login_required\nweb=Flask('x')\n@login_required\n@web.delete('/item')\ndef update():\n    pass",
+      "expected": [
+        "PY-AUTH-DECORATOR"
+      ],
+      "forbidden": []
+    },
+    {
+      "id": "boundary-auth-delete-52",
+      "language": "python",
+      "source": "import flask as f\nfrom flask_login import login_required as protect\nbp=f.Blueprint('items', __name__)\n@protect\n@bp.delete('/items')\ndef work():\n    pass",
+      "expected": [
+        "PY-AUTH-DECORATOR"
+      ],
+      "forbidden": []
+    },
+    {
+      "id": "boundary-auth-safe-delete-53",
+      "language": "python",
+      "source": "from flask import Flask\nfrom flask_login import login_required\nweb=Flask('x')\n@web.delete('/item')\n@login_required\ndef update():\n    pass",
+      "expected": [],
+      "forbidden": [
+        "PY-AUTH-DECORATOR"
+      ]
+    },
+    {
+      "id": "boundary-auth-safe-delete-54",
+      "language": "python",
+      "source": "from flask_login import login_required\napp=CustomRouter()\n@login_required\n@app.delete('/x')\ndef work():\n    pass",
+      "expected": [],
+      "forbidden": [
+        "PY-AUTH-DECORATOR"
+      ]
+    },
+    {
+      "id": "boundary-flask-log-55",
+      "language": "python",
+      "source": "from flask import Flask\nweb=Flask('service')\nweb.logger.warning('failed: %s', password)",
+      "expected": [
+        "PY-LOG-CREDENTIALS"
+      ],
+      "forbidden": []
+    },
+    {
+      "id": "boundary-flask-log-56",
+      "language": "python",
+      "source": "import flask as f\nsite=f.Flask('second')\nsite.logger.error(request.headers['Authorization'])",
+      "expected": [
+        "PY-LOG-CREDENTIALS"
+      ],
+      "forbidden": []
+    },
+    {
+      "id": "boundary-flask-log-57",
+      "language": "python",
+      "source": "from flask import Flask\napp=Flask('service')\napp.logger.info({'value': access_token})",
+      "expected": [
+        "PY-LOG-CREDENTIALS"
+      ],
+      "forbidden": []
+    },
+    {
+      "id": "boundary-flask-log-58",
+      "language": "python",
+      "source": "import logging\nlogging.error({'auth': request.headers['Authorization']})",
+      "expected": [
+        "PY-LOG-CREDENTIALS"
+      ],
+      "forbidden": []
+    },
+    {
+      "id": "boundary-flask-log-safe-59",
+      "language": "python",
+      "source": "from flask import Flask\napp=Flask('service')\napp.logger.warning('authentication failed')",
+      "expected": [],
+      "forbidden": [
+        "PY-LOG-CREDENTIALS"
+      ]
+    },
+    {
+      "id": "boundary-flask-log-safe-60",
+      "language": "python",
+      "source": "import flask\napp=flask.Flask('service')\napp.logger.error(redact(password))",
+      "expected": [],
+      "forbidden": [
+        "PY-LOG-CREDENTIALS"
+      ]
+    },
+    {
+      "id": "boundary-flask-log-safe-61",
+      "language": "python",
+      "source": "app=CustomApp()\napp.logger.error(password)",
+      "expected": [],
+      "forbidden": [
+        "PY-LOG-CREDENTIALS"
+      ]
+    },
+    {
+      "id": "boundary-flask-log-safe-62",
+      "language": "python",
+      "source": "from flask import Flask\napp=Flask('x')\napp=CustomApp()\napp.logger.error(token)",
+      "expected": [],
+      "forbidden": [
+        "PY-LOG-CREDENTIALS"
+      ]
+    },
+    {
+      "id": "boundary-flask-log-safe-63",
+      "language": "python",
+      "source": "from flask import Flask\ndef work(Flask):\n    app=Flask('x')\n    app.logger.warning(password)",
+      "expected": [],
+      "forbidden": [
+        "PY-LOG-CREDENTIALS"
+      ]
+    },
+    {
+      "id": "boundary-pg-bypass-64",
+      "language": "sql",
+      "source": "CREATE USER runtime_login SUPERUSER;",
+      "expected": [
+        "SQL-BYPASSRLS"
+      ],
+      "forbidden": []
+    },
+    {
+      "id": "boundary-pg-bypass-65",
+      "language": "sql",
+      "source": "ALTER USER service_user BYPASSRLS;",
+      "expected": [
+        "SQL-BYPASSRLS"
+      ],
+      "forbidden": []
+    },
+    {
+      "id": "boundary-pg-bypass-66",
+      "language": "sql",
+      "source": "CREATE ROLE elevated LOGIN BYPASSRLS;",
+      "expected": [
+        "SQL-BYPASSRLS"
+      ],
+      "forbidden": []
+    },
+    {
+      "id": "boundary-pg-bypass-67",
+      "language": "sql",
+      "source": "ALTER ROLE admin_role SUPERUSER;",
+      "expected": [
+        "SQL-BYPASSRLS"
+      ],
+      "forbidden": []
+    },
+    {
+      "id": "boundary-pg-bypass-safe-68",
+      "language": "sql",
+      "source": "CREATE USER app_login NOSUPERUSER NOBYPASSRLS;",
+      "expected": [],
+      "forbidden": [
+        "SQL-BYPASSRLS"
+      ]
+    },
+    {
+      "id": "boundary-pg-bypass-safe-69",
+      "language": "sql",
+      "source": "ALTER USER app_login NOSUPERUSER;",
+      "expected": [],
+      "forbidden": [
+        "SQL-BYPASSRLS"
+      ]
+    },
+    {
+      "id": "boundary-pg-bypass-safe-70",
+      "language": "sql",
+      "source": "-- CREATE USER app SUPERUSER;\nSELECT 'ALTER ROLE app BYPASSRLS';",
+      "expected": [],
+      "forbidden": [
+        "SQL-BYPASSRLS"
+      ]
+    },
+    {
+      "id": "boundary-pg-bypass-safe-71",
+      "language": "sql",
+      "source": "CREATE USER app PASSWORD 'SUPERUSER';",
+      "expected": [],
+      "forbidden": [
+        "SQL-BYPASSRLS"
+      ]
+    },
+    {
+      "id": "boundary-pg-bypass-safe-72",
+      "language": "sql",
+      "source": "CREATE USER app; ALTER USER app NOBYPASSRLS;",
+      "expected": [],
+      "forbidden": [
+        "SQL-BYPASSRLS"
+      ]
+    },
+    {
+      "id": "boundary-pg-public-73",
+      "language": "sql",
+      "source": "GRANT CREATE ON SCHEMA public TO PUBLIC;",
+      "expected": [
+        "SQL-PUBLIC-GRANT"
+      ],
+      "forbidden": []
+    },
+    {
+      "id": "boundary-pg-public-74",
+      "language": "sql",
+      "source": "GRANT INSERT, UPDATE, DELETE ON TABLE notes TO PUBLIC;",
+      "expected": [
+        "SQL-PUBLIC-GRANT"
+      ],
+      "forbidden": []
+    },
+    {
+      "id": "boundary-pg-public-75",
+      "language": "sql",
+      "source": "GRANT SELECT ON private_notes TO PUBLIC;",
+      "expected": [
+        "SQL-PUBLIC-GRANT"
+      ],
+      "forbidden": []
+    },
+    {
+      "id": "boundary-pg-public-76",
+      "language": "sql",
+      "source": "GRANT ALL PRIVILEGES ON SCHEMA data TO PUBLIC;",
+      "expected": [
+        "SQL-PUBLIC-GRANT"
+      ],
+      "forbidden": []
+    },
+    {
+      "id": "boundary-pg-public-safe-77",
+      "language": "sql",
+      "source": "GRANT UPDATE ON notes TO app_reader;",
+      "expected": [],
+      "forbidden": [
+        "SQL-PUBLIC-GRANT"
+      ]
+    },
+    {
+      "id": "boundary-pg-public-safe-78",
+      "language": "sql",
+      "source": "REVOKE CREATE ON SCHEMA public FROM PUBLIC;",
+      "expected": [],
+      "forbidden": [
+        "SQL-PUBLIC-GRANT"
+      ]
+    },
+    {
+      "id": "boundary-pg-public-safe-79",
+      "language": "sql",
+      "source": "GRANT SELECT ON notes TO app; SELECT 'TO PUBLIC';",
+      "expected": [],
+      "forbidden": [
+        "SQL-PUBLIC-GRANT"
+      ]
+    },
+    {
+      "id": "boundary-pg-public-safe-80",
+      "language": "sql",
+      "source": "-- GRANT DELETE ON notes TO PUBLIC;\nSELECT 'GRANT ALL ON notes TO PUBLIC';",
+      "expected": [],
+      "forbidden": [
+        "SQL-PUBLIC-GRANT"
+      ]
+    },
+    {
+      "id": "boundary-pg-server-role-81",
+      "language": "sql",
+      "source": "GRANT pg_execute_server_program TO service_app;",
+      "expected": [
+        "SQL-SERVER-ROLE"
+      ],
+      "forbidden": []
+    },
+    {
+      "id": "boundary-pg-server-role-82",
+      "language": "sql",
+      "source": "GRANT pg_monitor, pg_read_server_files, pg_write_server_files TO worker;",
+      "expected": [
+        "SQL-SERVER-ROLE"
+      ],
+      "forbidden": []
+    },
+    {
+      "id": "boundary-pg-server-role-83",
+      "language": "sql",
+      "source": "GRANT pg_write_server_files TO ingest;",
+      "expected": [
+        "SQL-SERVER-ROLE"
+      ],
+      "forbidden": []
+    },
+    {
+      "id": "boundary-pg-server-role-safe-84",
+      "language": "sql",
+      "source": "REVOKE pg_execute_server_program FROM service_app;",
+      "expected": [],
+      "forbidden": [
+        "SQL-SERVER-ROLE"
+      ]
+    },
+    {
+      "id": "boundary-pg-server-role-safe-85",
+      "language": "sql",
+      "source": "GRANT pg_monitor TO metrics_reader;",
+      "expected": [],
+      "forbidden": [
+        "SQL-SERVER-ROLE"
+      ]
+    },
+    {
+      "id": "boundary-pg-server-role-safe-86",
+      "language": "sql",
+      "source": "SELECT 'GRANT pg_read_server_files TO app';",
+      "expected": [],
+      "forbidden": [
+        "SQL-SERVER-ROLE"
+      ]
+    },
+    {
+      "id": "boundary-pg-server-role-safe-87",
+      "language": "sql",
+      "source": "GRANT app_reader TO service_app; -- pg_read_server_files",
+      "expected": [],
+      "forbidden": [
+        "SQL-SERVER-ROLE"
+      ]
+    },
+    {
+      "id": "boundary-express-cors-88",
+      "language": "javascript",
+      "source": "const corsPolicy=require('cors');\napp.use(corsPolicy({origin:true, credentials:true}));",
+      "expected": [
+        "CFG-CORS"
+      ],
+      "forbidden": []
+    },
+    {
+      "id": "boundary-express-cors-89",
+      "language": "javascript",
+      "source": "import allow from 'cors';\napp.use(allow({'credentials':true, 'origin':true}));",
+      "expected": [
+        "CFG-CORS"
+      ],
+      "forbidden": []
+    },
+    {
+      "id": "boundary-express-cors-safe-90",
+      "language": "javascript",
+      "source": "const c=require('cors'); app.use(c({origin:'https://ui.example.invalid', credentials:true}));",
+      "expected": [],
+      "forbidden": [
+        "CFG-CORS"
+      ]
+    },
+    {
+      "id": "boundary-express-cors-safe-91",
+      "language": "javascript",
+      "source": "import policy from 'cors'; app.use(policy({origin:false, credentials:true}));",
+      "expected": [],
+      "forbidden": [
+        "CFG-CORS"
+      ]
+    },
+    {
+      "id": "boundary-express-cors-safe-92",
+      "language": "javascript",
+      "source": "function cors(options){return options;} cors({origin:true, credentials:true});",
+      "expected": [],
+      "forbidden": [
+        "CFG-CORS"
+      ]
+    },
+    {
+      "id": "boundary-express-cors-safe-93",
+      "language": "javascript",
+      "source": "const c=require('cors'); c=custom; c({origin:true, credentials:true});",
+      "expected": [],
+      "forbidden": [
+        "CFG-CORS"
+      ]
+    },
+    {
+      "id": "boundary-express-cors-safe-94",
+      "language": "javascript",
+      "source": "const c=require('cors'); function test(c){c({origin:true, credentials:true});}",
+      "expected": [],
+      "forbidden": [
+        "CFG-CORS"
+      ]
+    },
+    {
+      "id": "boundary-express-cors-safe-95",
+      "language": "javascript",
+      "source": "import c from 'cors'; c({origin:true, credentials:true, origin:false});",
+      "expected": [],
+      "forbidden": [
+        "CFG-CORS"
+      ]
+    },
+    {
+      "id": "boundary-express-cors-safe-96",
+      "language": "javascript",
+      "source": "const c=require('cors'); c({origin:true, credentials:true, ...other});",
+      "expected": [],
+      "forbidden": [
+        "CFG-CORS"
+      ]
+    },
+    {
+      "id": "boundary-express-cors-safe-97",
+      "language": "javascript",
+      "source": "/* const c=require('cors'); c({origin:true, credentials:true}); */",
+      "expected": [],
+      "forbidden": [
+        "CFG-CORS"
+      ]
+    },
+    {
+      "id": "boundary-express-session-98",
+      "language": "javascript",
+      "source": "const sessions=require('express-session'); app.use(sessions({cookie:{httpOnly:false}}));",
+      "expected": [
+        "CFG-COOKIE-FLAGS"
+      ],
+      "forbidden": []
+    },
+    {
+      "id": "boundary-express-session-99",
+      "language": "javascript",
+      "source": "import sessionMiddleware from 'express-session'; app.use(sessionMiddleware({'cookie':{'httpOnly':false, secure:false}}));",
+      "expected": [
+        "CFG-COOKIE-FLAGS"
+      ],
+      "forbidden": []
+    },
+    {
+      "id": "boundary-express-session-safe-100",
+      "language": "javascript",
+      "source": "const s=require('express-session'); s({cookie:{httpOnly:true}});",
+      "expected": [],
+      "forbidden": [
+        "CFG-COOKIE-FLAGS"
+      ]
+    },
+    {
+      "id": "boundary-express-session-safe-101",
+      "language": "javascript",
+      "source": "import sessions from 'express-session'; sessions({cookie:{secure:false}});",
+      "expected": [],
+      "forbidden": [
+        "CFG-COOKIE-FLAGS"
+      ]
+    },
+    {
+      "id": "boundary-express-session-safe-102",
+      "language": "javascript",
+      "source": "function session(options){return options;} session({cookie:{httpOnly:false}});",
+      "expected": [],
+      "forbidden": [
+        "CFG-COOKIE-FLAGS"
+      ]
+    },
+    {
+      "id": "boundary-express-session-safe-103",
+      "language": "javascript",
+      "source": "const sessions=require('express-session'); function test(sessions){sessions({cookie:{httpOnly:false}});}",
+      "expected": [],
+      "forbidden": [
+        "CFG-COOKIE-FLAGS"
+      ]
+    },
+    {
+      "id": "boundary-express-session-safe-104",
+      "language": "javascript",
+      "source": "const s=require('express-session'); s({cookie:{httpOnly:false}, cookie:{httpOnly:true}});",
+      "expected": [],
+      "forbidden": [
+        "CFG-COOKIE-FLAGS"
+      ]
+    },
+    {
+      "id": "boundary-express-session-safe-105",
+      "language": "javascript",
+      "source": "const s=require('express-session'); s({cookie:{httpOnly:false, ...overrides}});",
+      "expected": [],
+      "forbidden": [
+        "CFG-COOKIE-FLAGS"
+      ]
+    },
+    {
+      "id": "boundary-driver-request-sql-106",
+      "language": "javascript",
+      "source": "const pg=require('pg'); const client=new pg.Client(); client.query(req.query.sql);",
+      "expected": [
+        "JS-SQL"
+      ],
+      "forbidden": []
+    },
+    {
+      "id": "boundary-driver-request-sql-107",
+      "language": "javascript",
+      "source": "import * as driver from 'pg'; const pool=new driver.Pool(); pool.query(request.body.statement);",
+      "expected": [
+        "JS-SQL"
+      ],
+      "forbidden": []
+    },
+    {
+      "id": "boundary-driver-request-sql-108",
+      "language": "javascript",
+      "source": "import db from 'mysql2'; const pool=db.createPool({}); pool.execute(req.body.query);",
+      "expected": [
+        "JS-SQL"
+      ],
+      "forbidden": []
+    },
+    {
+      "id": "boundary-driver-request-sql-109",
+      "language": "javascript",
+      "source": "const driver=require('mysql2/promise'); const conn=driver.createConnection({}); conn.query(request.query['statement']);",
+      "expected": [
+        "JS-SQL"
+      ],
+      "forbidden": []
+    },
+    {
+      "id": "boundary-driver-sql-safe-110",
+      "language": "javascript",
+      "source": "const pg=require('pg'); const db=new pg.Pool(); db.query('SELECT id FROM notes WHERE id=$1',[req.query.id]);",
+      "expected": [],
+      "forbidden": [
+        "JS-SQL"
+      ]
+    },
+    {
+      "id": "boundary-driver-sql-safe-111",
+      "language": "javascript",
+      "source": "import mysql from 'mysql2'; const pool=mysql.createPool({}); pool.execute('SELECT id FROM notes WHERE id=?',[request.body.id]);",
+      "expected": [],
+      "forbidden": [
+        "JS-SQL"
+      ]
+    },
+    {
+      "id": "boundary-driver-sql-safe-112",
+      "language": "javascript",
+      "source": "const pg=require('pg'); const client=new pg.Client(); client=custom; client.query(req.query.sql);",
+      "expected": [],
+      "forbidden": [
+        "JS-SQL"
+      ]
+    },
+    {
+      "id": "boundary-driver-sql-safe-113",
+      "language": "javascript",
+      "source": "const pg=require('pg'); function test(pg){const db=new pg.Pool(); db.query(req.query.sql);}",
+      "expected": [],
+      "forbidden": [
+        "JS-SQL"
+      ]
+    },
+    {
+      "id": "boundary-driver-sql-safe-114",
+      "language": "javascript",
+      "source": "function query(value){return value;} query(req.query.sql);",
+      "expected": [],
+      "forbidden": [
+        "JS-SQL"
+      ]
+    },
+    {
+      "id": "boundary-driver-sql-safe-115",
+      "language": "javascript",
+      "source": "const db=CustomPool(); db.query(req.query.sql);",
+      "expected": [],
+      "forbidden": [
+        "JS-SQL"
+      ]
+    },
+    {
+      "id": "boundary-driver-sql-safe-116",
+      "language": "javascript",
+      "source": "const pg=require('pg'); const db=new pg.Pool(); function test(db){db.query(req.query.sql);}",
+      "expected": [],
+      "forbidden": [
+        "JS-SQL"
+      ]
+    },
+    {
+      "id": "boundary-driver-sql-safe-117",
+      "language": "javascript",
+      "source": "const pg=require('pg'); pg.Pool=custom; const db=new pg.Pool(); db.query(req.query.sql);",
+      "expected": [],
+      "forbidden": [
+        "JS-SQL"
+      ]
+    },
+    {
+      "id": "boundary-driver-sql-safe-118",
+      "language": "javascript",
+      "source": "const mysql=require('mysql2'); const pool=mysql.createPool({}); pool.query(validateStatement(req.query.sql));",
+      "expected": [],
+      "forbidden": [
+        "JS-SQL"
+      ]
+    },
+    {
+      "id": "boundary-driver-sql-safe-119",
+      "language": "javascript",
+      "source": "// db.query('SELECT '+req.query.name);\nconst example=\"db.execute('SELECT '+name)\";",
+      "expected": [],
+      "forbidden": [
+        "JS-SQL"
+      ]
+    },
+    {
+      "id": "boundary-console-credentials-120",
+      "language": "javascript",
+      "source": "console.error({value:req.body.password});",
+      "expected": [
+        "JS-LOG-CREDENTIALS"
+      ],
+      "forbidden": []
+    },
+    {
+      "id": "boundary-console-credentials-121",
+      "language": "javascript",
+      "source": "console.warn(request.headers['authorization']);",
+      "expected": [
+        "JS-LOG-CREDENTIALS"
+      ],
+      "forbidden": []
+    },
+    {
+      "id": "boundary-console-credentials-122",
+      "language": "javascript",
+      "source": "console.log('failed: '+access_token);",
+      "expected": [
+        "JS-LOG-CREDENTIALS"
+      ],
+      "forbidden": []
+    },
+    {
+      "id": "boundary-console-credentials-123",
+      "language": "javascript",
+      "source": "console.info([request.body.password, req.headers.authorization]);",
+      "expected": [
+        "JS-LOG-CREDENTIALS"
+      ],
+      "forbidden": []
+    },
+    {
+      "id": "boundary-console-safe-124",
+      "language": "javascript",
+      "source": "console.warn('authentication failed');",
+      "expected": [],
+      "forbidden": [
+        "JS-LOG-CREDENTIALS"
+      ]
+    },
+    {
+      "id": "boundary-console-safe-125",
+      "language": "javascript",
+      "source": "console.error(redact(req.body.password));",
+      "expected": [],
+      "forbidden": [
+        "JS-LOG-CREDENTIALS"
+      ]
+    },
+    {
+      "id": "boundary-console-safe-126",
+      "language": "javascript",
+      "source": "const console=customLogger; console.error(password);",
+      "expected": [],
+      "forbidden": [
+        "JS-LOG-CREDENTIALS"
+      ]
+    },
+    {
+      "id": "boundary-console-safe-127",
+      "language": "javascript",
+      "source": "function report(console){console.log(token);}",
+      "expected": [],
+      "forbidden": [
+        "JS-LOG-CREDENTIALS"
+      ]
+    },
+    {
+      "id": "boundary-console-safe-128",
+      "language": "javascript",
+      "source": "const report=(console)=>console.warn(req.headers.authorization);",
+      "expected": [],
+      "forbidden": [
+        "JS-LOG-CREDENTIALS"
+      ]
+    },
+    {
+      "id": "boundary-console-safe-129",
+      "language": "javascript",
+      "source": "const report=console=>console.error(password);",
+      "expected": [],
+      "forbidden": [
+        "JS-LOG-CREDENTIALS"
+      ]
+    },
+    {
+      "id": "boundary-console-safe-130",
+      "language": "javascript",
+      "source": "console.log=custom; console.log(password);",
+      "expected": [],
+      "forbidden": [
+        "JS-LOG-CREDENTIALS"
+      ]
+    },
+    {
+      "id": "boundary-console-safe-131",
+      "language": "javascript",
+      "source": "// console.log(password);\nconst example='console.error(token)';",
+      "expected": [],
+      "forbidden": [
+        "JS-LOG-CREDENTIALS"
+      ]
+    },
+    {
+      "id": "boundary-console-safe-132",
+      "language": "javascript",
+      "source": "const example=/console.error(password)/;",
+      "expected": [],
+      "forbidden": [
+        "JS-LOG-CREDENTIALS"
+      ]
+    },
+    {
+      "id": "boundary-console-safe-133",
+      "language": "javascript",
+      "source": "console.info({event:'login_failed', password:redact(req.body.password)});",
+      "expected": [],
+      "forbidden": [
+        "JS-LOG-CREDENTIALS"
+      ]
+    },
+    {
+      "id": "boundary-console-safe-134",
+      "language": "javascript",
+      "source": "const {console}=custom; console.log(token);",
+      "expected": [],
+      "forbidden": [
+        "JS-LOG-CREDENTIALS"
+      ]
+    },
+    {
+      "id": "boundary-trust-proxy-135",
+      "language": "javascript",
+      "source": "app.set(\"trust proxy\",true); // review direct access",
+      "expected": [
+        "JS-TRUST-PROXY"
+      ],
+      "forbidden": []
+    },
+    {
+      "id": "boundary-trust-proxy-136",
+      "language": "javascript",
+      "source": "application.set('trust proxy', true);\napplication.listen(port);",
+      "expected": [
+        "JS-TRUST-PROXY"
+      ],
+      "forbidden": []
+    },
+    {
+      "id": "boundary-trust-proxy-safe-137",
+      "language": "javascript",
+      "source": "app.set('trust proxy', false);",
+      "expected": [],
+      "forbidden": [
+        "JS-TRUST-PROXY"
+      ]
+    },
+    {
+      "id": "boundary-trust-proxy-safe-138",
+      "language": "javascript",
+      "source": "app.set('trust proxy', ['loopback']);",
+      "expected": [],
+      "forbidden": [
+        "JS-TRUST-PROXY"
+      ]
+    },
+    {
+      "id": "boundary-trust-proxy-safe-139",
+      "language": "javascript",
+      "source": "// app.set('trust proxy', true);\nconst example=\"app.set('trust proxy', true)\";",
+      "expected": [],
+      "forbidden": [
+        "JS-TRUST-PROXY"
+      ]
+    },
+    {
+      "id": "boundary-nosql-140",
+      "language": "javascript",
+      "source": "db.users.findOne(req.body);",
+      "expected": [
+        "JS-NOSQL"
+      ],
+      "forbidden": []
+    },
+    {
+      "id": "boundary-nosql-141",
+      "language": "javascript",
+      "source": "collection.find(request.query);",
+      "expected": [
+        "JS-NOSQL"
+      ],
+      "forbidden": []
+    },
+    {
+      "id": "boundary-nosql-safe-142",
+      "language": "javascript",
+      "source": "db.users.findOne({username: validatedName});",
+      "expected": [],
+      "forbidden": [
+        "JS-NOSQL"
+      ]
+    },
+    {
+      "id": "boundary-nosql-safe-143",
+      "language": "javascript",
+      "source": "collection.find({owner:actor.id});",
+      "expected": [],
+      "forbidden": [
+        "JS-NOSQL"
+      ]
+    },
+    {
+      "id": "boundary-prototype-144",
+      "language": "javascript",
+      "source": "merge(settings,req.body);",
+      "expected": [
+        "JS-PROTOTYPE"
+      ],
+      "forbidden": []
+    },
+    {
+      "id": "boundary-prototype-145",
+      "language": "javascript",
+      "source": "defaultsDeep(config,request.body);",
+      "expected": [
+        "JS-PROTOTYPE"
+      ],
+      "forbidden": []
+    },
+    {
+      "id": "boundary-prototype-safe-146",
+      "language": "javascript",
+      "source": "merge(settings,{theme:approvedTheme});",
+      "expected": [],
+      "forbidden": [
+        "JS-PROTOTYPE"
+      ]
+    },
+    {
+      "id": "boundary-prototype-safe-147",
+      "language": "javascript",
+      "source": "defaultsDeep(config,serverDefaults);",
+      "expected": [],
+      "forbidden": [
+        "JS-PROTOTYPE"
+      ]
+    },
+    {
+      "id": "boundary-as-string-raw",
+      "language": "python",
+      "source": "from psycopg import sql\ncur.execute(sql.SQL(request.args['statement']).as_string(cur))",
+      "expected": [
+        "PY-SQL"
+      ],
+      "forbidden": []
+    },
+    {
+      "id": "boundary-as-string-format-raw",
+      "language": "python",
+      "source": "from psycopg2 import sql as q\ncur.execute(q.SQL('SELECT {}').format(q.SQL(column)).as_string(conn))",
+      "expected": [
+        "PY-SQL"
+      ],
+      "forbidden": []
+    },
+    {
+      "id": "boundary-as-string-identifier",
+      "language": "python",
+      "source": "from psycopg.sql import SQL, Identifier\ncur.execute(SQL('SELECT {}').format(Identifier(column)).as_string(cur))",
+      "expected": [],
+      "forbidden": [
+        "PY-SQL"
+      ]
+    },
+    {
+      "id": "boundary-as-string-literal",
+      "language": "python",
+      "source": "from psycopg2 import sql\ncur.execute(sql.SQL('SELECT {}').format(sql.Literal(value)).as_string(conn))",
+      "expected": [],
+      "forbidden": [
+        "PY-SQL"
+      ]
+    },
+    {
+      "id": "boundary-join-raw",
+      "language": "python",
+      "source": "from psycopg2.sql import SQL\ncur.execute(SQL(' AND ').join([SQL(filter_text), SQL('active=true')]))",
+      "expected": [
+        "PY-SQL"
+      ],
+      "forbidden": []
+    },
+    {
+      "id": "boundary-join-identifiers",
+      "language": "python",
+      "source": "from psycopg import sql as q\ncur.execute(q.SQL(', ').join([q.Identifier(first), q.Identifier(second)]))",
+      "expected": [],
+      "forbidden": [
+        "PY-SQL"
+      ]
+    },
+    {
+      "id": "boundary-debug-attribute",
+      "language": "python",
+      "source": "from flask import Flask as Application\nserver=Application('review')\nserver.debug=True",
+      "expected": [
+        "PY-DEBUG"
+      ],
+      "forbidden": []
+    },
+    {
+      "id": "boundary-uncalled-mysql-factory",
+      "language": "javascript",
+      "source": "const mysql=require('mysql2'); const pool=mysql.createPool; pool.query(req.query.sql);",
+      "expected": [],
+      "forbidden": [
+        "JS-SQL"
+      ]
+    },
+    {
+      "id": "boundary-uncalled-mysql-factory-alias",
+      "language": "javascript",
+      "source": "import mysql from 'mysql'; const client=mysql.createConnection; client.execute(request.body.sql);",
+      "expected": [],
+      "forbidden": [
+        "JS-SQL"
+      ]
+    }
+  ]
+}

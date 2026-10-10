@@ -1,0 +1,483 @@
+{
+  "schema": "durkahelper.toolchain-lock.v1",
+  "reviewed_on": "2026-10-09",
+  "ci_target": {
+    "architecture": "arm64",
+    "evidence": [
+      ".github/workflows/macos-arm64.yml",
+      "https://github.com/actions/python-versions/releases/tag/3.10.11-11114431484"
+    ],
+    "os": "macos-15",
+    "python": "3.10.11",
+    "status": "EXISTING"
+  },
+  "components": {
+    "container-runtime": {
+      "architectures": [
+        {
+          "arch": "arm64",
+          "os": "macos",
+          "status": "BLOCKED"
+        },
+        {
+          "arch": "amd64",
+          "os": "linux",
+          "status": "EXISTING"
+        }
+      ],
+      "evidence": [
+        "https://github.com/C4T-BuT-S4D/S4DFarm/blob/3b8b057c95e0467c6afb3a47648e8b6befd1a815/compose.yml",
+        "https://github.com/C4T-BuT-S4D/neo/blob/2f2a4eb63f9715155844284f253ba786d330c9ae/compose.yml",
+        "https://gitlab.com/packmate/Packmate/-/blob/938031f1dedfbedabef5b049368ed5b6ba6a900a/docker-compose.yml"
+      ],
+      "reason": "Docker Desktop is the selected candidate for the target Apple Silicon Mac. Exact version, license eligibility, platform approval, image compatibility and multi-client LAN acceptance remain unverified. Its managed Linux VM does not imply Linux host-network or capture parity.",
+      "status": "BLOCKED",
+      "version": null
+    },
+    "durkahelper": {
+      "architectures": [
+        {
+          "arch": "any",
+          "os": "source",
+          "status": "EXISTING"
+        },
+        {
+          "arch": "arm64",
+          "os": "macos",
+          "status": "EXISTING"
+        },
+        {
+          "arch": "amd64",
+          "os": "linux",
+          "status": "EXISTING"
+        }
+      ],
+      "dependency_model": "python-standard-library-only",
+      "evidence": [
+        "README.md",
+        ".github/workflows/macos-arm64.yml"
+      ],
+      "status": "EXISTING",
+      "tools": [
+        {
+          "name": "defense_scan",
+          "status": "EXISTING",
+          "version": "1.8.0"
+        },
+        {
+          "name": "defense_ops",
+          "status": "PARTIAL",
+          "version": "2.2.0"
+        }
+      ],
+      "version": null,
+      "version_status": "UNVERIFIED"
+    },
+    "github-actions-checkout": {
+      "architectures": [
+        {
+          "arch": "any",
+          "os": "github-hosted-runner",
+          "status": "EXISTING"
+        }
+      ],
+      "evidence": [
+        "https://github.com/actions/checkout/commit/3d3c42e5aac5ba805825da76410c181273ba90b1",
+        "https://github.com/actions/checkout/releases/tag/v7.0.1"
+      ],
+      "source": {
+        "commit": "3d3c42e5aac5ba805825da76410c181273ba90b1",
+        "repository": "https://github.com/actions/checkout",
+        "tag": "v7.0.1"
+      },
+      "status": "EXISTING",
+      "version": "7.0.1"
+    },
+    "github-actions-setup-python": {
+      "architectures": [
+        {
+          "arch": "any",
+          "os": "github-hosted-runner",
+          "status": "EXISTING"
+        }
+      ],
+      "evidence": [
+        "https://github.com/actions/setup-python/commit/5fda3b95a4ea91299a34e894583c3862153e4b97",
+        "https://github.com/actions/setup-python/releases/tag/v7.0.0"
+      ],
+      "source": {
+        "commit": "5fda3b95a4ea91299a34e894583c3862153e4b97",
+        "repository": "https://github.com/actions/setup-python",
+        "tag": "v7.0.0"
+      },
+      "status": "EXISTING",
+      "version": "7.0.0"
+    },
+    "neo": {
+      "architectures": [
+        {
+          "arch": "arm64",
+          "os": "darwin",
+          "status": "UNVERIFIED"
+        },
+        {
+          "arch": "amd64",
+          "os": "darwin",
+          "status": "UNVERIFIED"
+        },
+        {
+          "arch": "arm64",
+          "os": "linux",
+          "status": "UNVERIFIED"
+        },
+        {
+          "arch": "amd64",
+          "os": "linux",
+          "status": "EXISTING"
+        }
+      ],
+      "evidence": [
+        "https://github.com/C4T-BuT-S4D/neo/commit/2f2a4eb63f9715155844284f253ba786d330c9ae",
+        "https://github.com/C4T-BuT-S4D/neo/commit/4eee7b9cd6dc1773ad5a0015808072416ad08964",
+        "https://github.com/C4T-BuT-S4D/neo/releases/tag/v2.4.2",
+        "https://github.com/C4T-BuT-S4D/neo/releases/download/v2.4.2/checksums.txt"
+      ],
+      "images": {
+        "items": [
+          {
+            "digest": "sha256:c20b46bba1d93b9ca6fca27bd76289697a019f7a0ed55db19a9cef523e3c1dde",
+            "repository": "ghcr.io/c4t-but-s4d/neo_env",
+            "manifest_platforms": [
+              "linux/amd64"
+            ],
+            "status": "EXISTING",
+            "tag": "v2.4.2"
+          },
+          {
+            "digest": "sha256:75deed498a6451f702d88f05495af8c7006707ac223ad4b2e7def0d947b622bc",
+            "repository": "ghcr.io/c4t-but-s4d/neo_env_light",
+            "manifest_platforms": [
+              "linux/amd64",
+              "linux/arm64"
+            ],
+            "status": "EXISTING",
+            "tag": "v2.4.2"
+          },
+          {
+            "digest": "sha256:4bc9f5b55fbaa89b8158aab4cf206125612a74abce86c65873bedf1f12a5ceac",
+            "repository": "ghcr.io/c4t-but-s4d/neo_env_sage",
+            "manifest_platforms": [
+              "linux/amd64"
+            ],
+            "status": "EXISTING",
+            "tag": "v2.4.2"
+          },
+          {
+            "digest": "sha256:fd5de2340bc46cbc2241975ab027797c350dec6fd86349e3ac384e3a41be6fee",
+            "repository": "redis",
+            "status": "EXISTING",
+            "tag": "7.2.0-alpine",
+            "evidence": "config/integration-images.lock.json"
+          },
+          {
+            "digest": null,
+            "repository": "grafana/grafana-oss",
+            "status": "UNVERIFIED",
+            "tag": "10.0.3"
+          },
+          {
+            "digest": null,
+            "repository": "victoriametrics/victoria-metrics",
+            "status": "UNVERIFIED",
+            "tag": "v1.92.1"
+          }
+        ],
+        "reason": "Registry descriptors resolved for neo_env, neo_env_light and neo_env_sage v2.4.2. Only light advertises linux/arm64; its Linux amd64 worker passed the harmless synthetic lifecycle. ARM64 runtime and full/Sage task environments remain unverified. Redis is pinned in the integration image lock; optional monitoring images remain unresolved and are not required by the maintained deployment.",
+        "status": "PARTIAL"
+      },
+      "release": {
+        "assets": [
+          {
+            "architecture": "any",
+            "name": "checksums.txt",
+            "os": "any",
+            "published_sha256": null,
+            "size": 582,
+            "status": "UNVERIFIED",
+            "url": "https://github.com/C4T-BuT-S4D/neo/releases/download/v2.4.2/checksums.txt"
+          },
+          {
+            "architecture": "amd64",
+            "name": "neo_client_2.4.2_darwin_amd64.zip",
+            "os": "darwin",
+            "published_sha256": "340ec1366dbc0c198eb58fe4ec4fb805ee33d124aeece5e8545837f30087d600",
+            "size": 5569910,
+            "status": "EXISTING",
+            "url": "https://github.com/C4T-BuT-S4D/neo/releases/download/v2.4.2/neo_client_2.4.2_darwin_amd64.zip"
+          },
+          {
+            "architecture": "arm64",
+            "name": "neo_client_2.4.2_darwin_arm64.zip",
+            "os": "darwin",
+            "published_sha256": "b620558b699ca0f70d33a9bef070a6870f07d666d9e60a9d308ee7b757fd424d",
+            "size": 5370016,
+            "status": "EXISTING",
+            "url": "https://github.com/C4T-BuT-S4D/neo/releases/download/v2.4.2/neo_client_2.4.2_darwin_arm64.zip"
+          },
+          {
+            "architecture": "amd64",
+            "name": "neo_client_2.4.2_linux_amd64.tar.gz",
+            "os": "linux",
+            "published_sha256": "42a0affe303195693f29f1998ac13fac9238db71e7395674f5141bfc553274de",
+            "size": 5326241,
+            "status": "EXISTING",
+            "url": "https://github.com/C4T-BuT-S4D/neo/releases/download/v2.4.2/neo_client_2.4.2_linux_amd64.tar.gz"
+          },
+          {
+            "architecture": "arm64",
+            "name": "neo_client_2.4.2_linux_arm64.tar.gz",
+            "os": "linux",
+            "published_sha256": "3891f91b383cd26ca0f37151565791b38771dd227daabcbb67d91a093b997691",
+            "size": 4916523,
+            "status": "EXISTING",
+            "url": "https://github.com/C4T-BuT-S4D/neo/releases/download/v2.4.2/neo_client_2.4.2_linux_arm64.tar.gz"
+          },
+          {
+            "architecture": "unspecified",
+            "name": "neo_client_env_2.4.2.zip",
+            "os": "container-host",
+            "published_sha256": "30491c40d99f7e90bc1699d1bc962bda83f6c5ba6b92c5f8d82660fed5954708",
+            "size": 5676,
+            "status": "EXISTING",
+            "url": "https://github.com/C4T-BuT-S4D/neo/releases/download/v2.4.2/neo_client_env_2.4.2.zip"
+          },
+          {
+            "architecture": "any",
+            "name": "neo_server_2.4.2.zip",
+            "os": "source",
+            "published_sha256": "14cfbacbfc3a4d7b4ce8462448c2036e5ca210145df437e32e34bc627580573d",
+            "size": 134121,
+            "status": "EXISTING",
+            "url": "https://github.com/C4T-BuT-S4D/neo/releases/download/v2.4.2/neo_server_2.4.2.zip"
+          }
+        ],
+        "published_at": "2023-10-23T14:19:13Z",
+        "status": "EXISTING",
+        "tag": "v2.4.2",
+        "tag_commit": "4eee7b9cd6dc1773ad5a0015808072416ad08964"
+      },
+      "setup": {
+        "reason": "Retained-source server and published v2.4.2 Linux amd64 client passed synthetic info/auth, harmless fixed task execution, worker reconnect and retained disabled entry. New-project recovery preserved Neo bbolt/Redis state with worker stopped, and maintained deployment passed authenticated startup. Arbitrary task dependencies, TLS, real queues, ARM64 and Docker Desktop remain unverified; source and release pins intentionally differ.",
+        "status": "PARTIAL"
+      },
+      "source": {
+        "commit": "2f2a4eb63f9715155844284f253ba786d330c9ae",
+        "repository": "https://github.com/C4T-BuT-S4D/neo",
+        "tag": null
+      },
+      "status": "PARTIAL",
+      "submodules": {
+        "evidence": "https://api.github.com/repos/C4T-BuT-S4D/neo/git/trees/2f2a4eb63f9715155844284f253ba786d330c9ae?recursive=1",
+        "items": [],
+        "status": "EXISTING"
+      },
+      "version": "2.4.2"
+    },
+    "packmate": {
+      "architectures": [
+        {
+          "arch": "amd64",
+          "os": "linux",
+          "status": "EXISTING"
+        },
+        {
+          "arch": "arm64",
+          "os": "macos",
+          "status": "UNVERIFIED"
+        }
+      ],
+      "evidence": [
+        "https://gitlab.com/packmate/Packmate/-/commit/938031f1dedfbedabef5b049368ed5b6ba6a900a",
+        "https://gitlab.com/packmate/Packmate/-/blob/938031f1dedfbedabef5b049368ed5b6ba6a900a/.gitmodules",
+        "https://gitlab.com/packmate/Packmate/-/blob/938031f1dedfbedabef5b049368ed5b6ba6a900a/docs/SETUP.md",
+        "https://gitlab.com/packmate/packmate-frontend/-/commit/8f23d97100f11cd6671bb62aca5ce9b6a898b865",
+        "https://gitlab.com/packmate/starter/-/commit/25a2517dceb567a1571cd3666cfaadee0b66779b"
+      ],
+      "images": {
+        "items": [
+          {
+            "digest": "sha256:faa39ec74a63d84558e08ab949b7724a0a014f6629d105a5212a3afb05c7cbf7",
+            "repository": "registry.gitlab.com/packmate/packmate",
+            "manifest_platforms": [
+              "linux/amd64"
+            ],
+            "status": "EXISTING",
+            "tag": "v4.0"
+          },
+          {
+            "digest": "sha256:78a275d4c891f7b3a33d3f1a78eda9f1d744954d9e20122bfdc97cdda25cddaf",
+            "repository": "postgres",
+            "manifest_platforms": [
+              "linux/amd64",
+              "linux/arm64/v8"
+            ],
+            "status": "EXISTING",
+            "tag": "15.2"
+          }
+        ],
+        "reason": "Exact v4.0 app and PostgreSQL15.2 registry digests resolved and pulled on Linux amd64. App is a single amd64 manifest; native ARM64 image is absent. Emulation, image-to-source provenance and real Mac runtime remain unverified.",
+        "status": "PARTIAL"
+      },
+      "setup": {
+        "evidence": "https://gitlab.com/packmate/Packmate/-/blob/938031f1dedfbedabef5b049368ed5b6ba6a900a/docs/SETUP.md",
+        "reason": "Retained SETUP/API reviewed. Unchanged image passed synthetic FILE import, configuration-only failed-auth logger canary and native PostgreSQL recovery. Maintained FILE deployment passed 11 checks. Scoped Linux container-namespace LIVE passed 28 checks plus five cleanups after framing/cleanup fixes at 81e2c5064b3530c365ae001e9fe36aa797706fd0. Ordered TCP payload checks do not prove packet-spanning pattern semantics. Real observation-point permission, packet visibility, long-running loss/storage, Docker Desktop and Mac remain separate gates.",
+        "status": "PARTIAL"
+      },
+      "source": {
+        "commit": "938031f1dedfbedabef5b049368ed5b6ba6a900a",
+        "repository": "https://gitlab.com/packmate/Packmate",
+        "tag": "v4.0"
+      },
+      "starter": {
+        "commit": "25a2517dceb567a1571cd3666cfaadee0b66779b",
+        "repository": "https://gitlab.com/packmate/starter",
+        "status": "UNVERIFIED"
+      },
+      "status": "PARTIAL",
+      "submodules": {
+        "items": [
+          {
+            "commit": "8f23d97100f11cd6671bb62aca5ce9b6a898b865",
+            "path": "frontend",
+            "repository": "https://gitlab.com/packmate/packmate-frontend",
+            "status": "EXISTING"
+          }
+        ],
+        "status": "EXISTING"
+      },
+      "version": "4.0",
+      "version_status": "EXISTING"
+    },
+    "python": {
+      "architectures": [
+        {
+          "arch": "arm64",
+          "asset": "python-3.10.11-darwin-arm64.tar.gz",
+          "os": "darwin",
+          "status": "UNVERIFIED"
+        }
+      ],
+      "asset": {
+        "digest": null,
+        "size": 40749885,
+        "status": "UNVERIFIED",
+        "url": "https://github.com/actions/python-versions/releases/download/3.10.11-11114431484/python-3.10.11-darwin-arm64.tar.gz"
+      },
+      "evidence": [
+        "https://github.com/actions/python-versions/releases/tag/3.10.11-11114431484",
+        ".github/workflows/macos-arm64.yml"
+      ],
+      "status": "UNVERIFIED",
+      "version": "3.10.11"
+    },
+    "ripgrep": {
+      "architectures": [
+        {
+          "arch": "arm64",
+          "os": "macos",
+          "status": "EXISTING"
+        }
+      ],
+      "evidence": [
+        ".github/workflows/macos-arm64.yml",
+        "https://github.com/BurntSushi/ripgrep/releases/tag/15.1.0"
+      ],
+      "asset": {
+        "url": "https://github.com/BurntSushi/ripgrep/releases/download/15.1.0/ripgrep-15.1.0-aarch64-apple-darwin.tar.gz",
+        "sha256": "378e973289176ca0c6054054ee7f631a065874a352bf43f0fa60ef079b6ba715",
+        "status": "UNVERIFIED"
+      },
+      "reason": "Pinned ARM64 release is checksum-checked and was executed by the current hosted macOS core workflow. The actual Mac remains a separate gate.",
+      "status": "EXISTING",
+      "version": "15.1.0"
+    },
+    "s4dfarm": {
+      "architectures": [
+        {
+          "arch": "amd64",
+          "os": "linux-container-host",
+          "status": "EXISTING"
+        },
+        {
+          "arch": "arm64",
+          "os": "macos-container-host",
+          "status": "UNVERIFIED"
+        }
+      ],
+      "evidence": [
+        "https://github.com/C4T-BuT-S4D/S4DFarm/commit/3b8b057c95e0467c6afb3a47648e8b6befd1a815",
+        "https://github.com/C4T-BuT-S4D/S4DFarm/blob/3b8b057c95e0467c6afb3a47648e8b6befd1a815/compose.yml",
+        "https://github.com/C4T-BuT-S4D/S4DFarm/blob/3b8b057c95e0467c6afb3a47648e8b6befd1a815/server/app/config.py"
+      ],
+      "images": {
+        "items": [
+          {
+            "digest": "sha256:578ca5c8452c08a4e0f5e65b55dce5e1812fe63c8fee40ea837641031598e51e",
+            "repository": "postgres",
+            "status": "EXISTING",
+            "tag": "14.1-alpine",
+            "evidence": "config/integration-images.lock.json"
+          },
+          {
+            "digest": "sha256:fd5de2340bc46cbc2241975ab027797c350dec6fd86349e3ac384e3a41be6fee",
+            "repository": "redis",
+            "status": "EXISTING",
+            "tag": "7.2.0-alpine",
+            "evidence": "config/integration-images.lock.json"
+          },
+          {
+            "digest": null,
+            "repository": null,
+            "roles": [
+              "celery",
+              "farm",
+              "front"
+            ],
+            "status": "EXISTING",
+            "tag": null,
+            "identity_kind": "local-docker-image-id",
+            "identity_source": "private deployment build-receipt.v2",
+            "reason": "No published repository digest is invented for locally built images; exact IDs belong to the private receipt/export manifest."
+          }
+        ],
+        "reason": "Seven base-image digests are fixed in config/integration-images.lock.json. Maintained Linux amd64 deployment built successfully and build-receipt.v2 pinned all ten service roles to local immutable IDs. Export/verify/import passed for nine unique runtime IDs without rewriting tags. This proves the declared image inventory, not layer-secret review, redistribution, ARM64 runtime or a complete disconnected cold start; source/client/license/native-installer kit remains incomplete.",
+        "lab_base_image_lock": "config/integration-images.lock.json",
+        "status": "PARTIAL",
+        "evidence": [
+          "docs/CAPABILITY_INVENTORY.md"
+        ]
+      },
+      "setup": {
+        "evidence": [
+          "https://github.com/C4T-BuT-S4D/S4DFarm/blob/3b8b057c95e0467c6afb3a47648e8b6befd1a815/server/app/config.py",
+          "https://github.com/C4T-BuT-S4D/S4DFarm/tree/3b8b057c95e0467c6afb3a47648e8b6befd1a815/server/app/protocols"
+        ],
+        "reason": "The retained default protocol names an absent adapter and remains broken. The maintained deployment explicitly requires reviewed ructf_http and passed only synthetic configuration/startup; a compatible competition-specific protocol/endpoint must still be confirmed.",
+        "status": "BROKEN"
+      },
+      "source": {
+        "commit": "3b8b057c95e0467c6afb3a47648e8b6befd1a815",
+        "repository": "https://github.com/C4T-BuT-S4D/S4DFarm",
+        "tag": null
+      },
+      "status": "PARTIAL",
+      "submodules": {
+        "evidence": "https://api.github.com/repos/C4T-BuT-S4D/S4DFarm/git/trees/3b8b057c95e0467c6afb3a47648e8b6befd1a815?recursive=1",
+        "items": [],
+        "status": "EXISTING"
+      },
+      "version": null,
+      "version_status": "UNVERIFIED"
+    }
+  }
+}

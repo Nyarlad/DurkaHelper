@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:durkahelper:schema:validation-record:v1",
+  "title": "DurkaHelper validation record v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "id", "timestamp", "check", "status", "summary"],
+  "properties": {
+    "schema": {"const": "durkahelper.validation-record.v1"},
+    "id": {"type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"},
+    "timestamp": {"type": "string", "format": "date-time"},
+    "check": {"type": "string", "minLength": 1, "maxLength": 120},
+    "status": {"enum": ["pass", "fail", "partial", "blocked", "not_run", "skipped_not_applicable"]},
+    "summary": {"type": "string", "minLength": 1, "maxLength": 512},
+    "evidence": {
+      "$comment": "NFC normalization is additionally enforced by the runtime.",
+      "type": "array",
+      "maxItems": 128,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 1024,
+        "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))(?!.*\\\\)(?!.*:)[^/]+(?:/[^/]+)*$"
+      }
+    },
+    "attributes": {"$ref": "#/$defs/attributes"}
+  },
+  "$defs": {
+    "attributes": {
+      "type": "object",
+      "maxProperties": 64,
+      "propertyNames": {
+        "minLength": 1,
+        "maxLength": 64,
+        "not": {"pattern": "(?:[Pp][Aa][Ss][Ss][Ww][Oo][Rr][Dd]|[Pp][Aa][Ss][Ss][Ww][Dd]|[Pp][Ww][Dd]|[Ss][Ee][Cc][Rr][Ee][Tt]|[Tt][Oo][Kk][Ee][Nn]|[Cc][Rr][Ee][Dd][Ee][Nn][Tt][Ii][Aa][Ll]|[Aa][Uu][Tt][Hh][Oo][Rr][Ii][Zz][Aa][Tt][Ii][Oo][Nn]|[Cc][Oo][Oo][Kk][Ii][Ee]|[Pp][Rr][Ii][Vv][Aa][Tt][Ee].?[Kk][Ee][Yy]|[Aa][Pp][Ii].?[Kk][Ee][Yy]|[Aa][Cc][Cc][Ee][Ss][Ss].?[Kk][Ee][Yy]|[Ss][Ee][Ss][Ss][Ii][Oo][Nn]|[Dd][Ss][Nn]|[Cc][Oo][Nn][Nn][Ee][Cc][Tt][Ii][Oo][Nn].?[Ss][Tt][Rr][Ii][Nn][Gg]|[Cc][Oo][Mm][Mm][Aa][Nn][Dd]|[Ee][Xx][Ee][Cc]|[Aa][Rr][Gg][Vv]|[Ss][Hh][Ee][Ll][Ll])"}
+      },
+      "additionalProperties": {
+        "anyOf": [
+          {"type": "string", "maxLength": 4096},
+          {"type": "number"},
+          {"type": "boolean"},
+          {"type": "null"}
+        ]
+      }
+    }
+  }
+}

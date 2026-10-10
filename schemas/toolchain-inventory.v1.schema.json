@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:durkahelper:toolchain-inventory:v1",
+  "title": "Operator-reviewed private cache recipe; not a runtime acceptance record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "release_commit", "target", "receipt", "image_export", "artifacts"],
+  "properties": {
+    "schema": {"const": "durkahelper.toolchain-inventory.v1"},
+    "release_commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "platform"],
+      "properties": {
+        "id": {"$ref": "#/$defs/id"},
+        "platform": {"enum": ["darwin/arm64", "linux/amd64", "linux/arm64", "windows/amd64"]}
+      }
+    },
+    "receipt": {"$ref": "#/$defs/reference"},
+    "image_export": {"$ref": "#/$defs/reference"},
+    "artifacts": {"type": "array", "maxItems": 128, "items": {"$ref": "#/$defs/artifact"}}
+  },
+  "$defs": {
+    "id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9_.-]{0,63}$"},
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "path": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096,
+      "description": "Portable relative POSIX path. Runtime validation additionally rejects traversal, links, private-data paths and collisions."
+    },
+    "reference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256"],
+      "properties": {"path": {"$ref": "#/$defs/path"}, "sha256": {"$ref": "#/$defs/sha256"}}
+    },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "path", "kind", "component", "architecture", "version", "sha256", "size", "license", "redistribution", "source_pins"],
+      "properties": {
+        "id": {"$ref": "#/$defs/id"},
+        "path": {"$ref": "#/$defs/path"},
+        "kind": {"enum": ["core", "source", "client", "license", "installer", "runtime"]},
+        "component": {"enum": ["durkahelper", "postgres", "redis", "s4dfarm", "neo", "packmate", "container-runtime", "python", "ripgrep"]},
+        "architecture": {"enum": ["all", "darwin/arm64", "linux/amd64", "linux/arm64", "windows/amd64"]},
+        "version": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._+:/@-]{0,127}$", "description": "Exact pin; floating names are rejected by runtime validation."},
+        "sha256": {"$ref": "#/$defs/sha256"},
+        "size": {"type": "integer", "minimum": 1, "maximum": 34359738368},
+        "license": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9.+() -]{0,127}$"},
+        "redistribution": {"const": "local-only"},
+        "source_pins": {
+          "type": "object",
+          "maxProperties": 32,
+          "additionalProperties": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+          "description": "For source archives only: dot is the root commit; every pinned submodule path must be present. Empty for other artifact kinds. Declarations do not independently authenticate archive provenance."
+        }
+      }
+    }
+  }
+}

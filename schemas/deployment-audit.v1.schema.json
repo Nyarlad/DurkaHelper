@@ -1,0 +1,126 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "checked_at",
+    "scope",
+    "model_sha256",
+    "policy_sha256",
+    "source_sha256",
+    "services",
+    "findings",
+    "issues",
+    "status",
+    "exit_code"
+  ],
+  "properties": {
+    "schema": {
+      "const": "durkahelper.deployment-audit.v1"
+    },
+    "checked_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "scope": {
+      "const": "declared-model-only"
+    },
+    "model_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "policy_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "source_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "services": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 64
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "service_sha256",
+          "check",
+          "kind"
+        ],
+        "properties": {
+          "service_sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "check": {
+            "type": "string",
+            "maxLength": 80
+          },
+          "kind": {
+            "enum": [
+              "deployment",
+              "security",
+              "availability",
+              "coverage"
+            ]
+          }
+        }
+      },
+      "maxItems": 4096
+    },
+    "issues": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "service_sha256",
+          "check",
+          "kind"
+        ],
+        "properties": {
+          "service_sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "check": {
+            "type": "string",
+            "maxLength": 80
+          },
+          "kind": {
+            "enum": [
+              "deployment",
+              "security",
+              "availability",
+              "coverage"
+            ]
+          }
+        }
+      },
+      "maxItems": 4096
+    },
+    "status": {
+      "enum": [
+        "pass",
+        "fail",
+        "partial"
+      ]
+    },
+    "exit_code": {
+      "enum": [
+        0,
+        1,
+        2
+      ]
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:durkahelper:schema:deployment-audit:v1",
+  "title": "Sanitized model-only audit",
+  "$comment": "Runtime enforces allowed check IDs and consistency between issues/findings/status/exit_code. Model/policy are recomputed when used by patch-check."
+}

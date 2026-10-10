@@ -1,0 +1,7 @@
+{
+  "service": {"name": "local-demo"},
+  "http": {"port": 8080},
+  "logging": {"level": "INFO"},
+  "credentials": {"password": "DEMO_ONLY_DO_NOT_COPY"},
+  "unselected": "THIS_FIELD_IS_NOT_INCLUDED"
+}

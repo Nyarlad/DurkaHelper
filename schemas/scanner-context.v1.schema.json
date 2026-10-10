@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:durkahelper:schema:scanner-context:v1",
+  "title": "Non-secret scanner infrastructure context v1",
+  "$comment": "Context only changes review priority and static explanations. It never disables rules, grants permission, starts processes or makes network requests. The runtime normalizes infrastructure enum ordering before hashing.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "infrastructure", "role"],
+  "properties": {
+    "schema": {"const": "durkahelper.scanner-context.v1"},
+    "infrastructure": {
+      "type": "array", "maxItems": 7, "uniqueItems": true,
+      "items": {"enum": ["docker-desktop", "compose", "vulnbox", "team-lan", "s4dfarm", "neo", "packmate"]}
+    },
+    "role": {"enum": ["defender", "administrator", "both"]}
+  }
+}

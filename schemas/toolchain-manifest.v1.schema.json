@@ -1,0 +1,132 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:durkahelper:toolchain-manifest:v1",
+  "title": "Operator-local external toolchain inventory",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "release_commit",
+    "required_ids",
+    "artifacts"
+  ],
+  "properties": {
+    "schema": {
+      "const": "durkahelper.toolchain-manifest.v1"
+    },
+    "release_commit": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "required_ids": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 256,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9][a-z0-9_.-]{0,63}$"
+      }
+    },
+    "artifacts": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 256,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "kind": {"const": "image"}
+              },
+              "required": ["kind"]
+            },
+            "then": {
+              "properties": {
+                "architecture": {
+                  "enum": ["linux/amd64", "linux/arm64"]
+                }
+              }
+            }
+          }
+        ],
+        "required": [
+          "id",
+          "path",
+          "kind",
+          "component",
+          "architecture",
+          "sha256",
+          "size",
+          "license",
+          "redistribution",
+          "image_ids"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_.-]{0,63}$"
+          },
+          "path": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
+          },
+          "kind": {
+            "enum": [
+              "core",
+              "image",
+              "source",
+              "client",
+              "license"
+            ]
+          },
+          "component": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_.-]{0,63}$"
+          },
+          "architecture": {
+            "enum": [
+              "all",
+              "linux/amd64",
+              "linux/arm64",
+              "darwin/arm64",
+              "windows/amd64"
+            ]
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "size": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 34359738368
+          },
+          "license": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9.+() -]{0,127}$"
+          },
+          "redistribution": {
+            "enum": [
+              "local-only",
+              "reviewed"
+            ]
+          },
+          "image_ids": {
+            "type": "array",
+            "maxItems": 64,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            }
+          }
+        }
+      }
+    }
+  },
+  "$comment": "CLI additionally enforces relative portable/private-path rules, exact inventory identities, byte budget, checksum matching and tag-free Docker-save structure. No redistribution or offline-runtime attestation is implied."
+}

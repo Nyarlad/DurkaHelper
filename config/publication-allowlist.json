@@ -1,0 +1,8 @@
+[
+  {
+    "path": "tests/test_ops_deployment_audit.py",
+    "category": "url-credentials",
+    "fingerprint": "a13515591db1985e9bc17173247956f3a0d4d96d363a6ff5c232b77d4c00db50",
+    "reason": "Reserved example.invalid URL containing a synthetic CANARY; verifies that credential-bearing image references are rejected without echoing their value."
+  }
+]

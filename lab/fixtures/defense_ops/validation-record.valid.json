@@ -1,0 +1,15 @@
+{
+  "schema": "durkahelper.validation-record.v1",
+  "id": "validation-baseline-0001",
+  "timestamp": "2026-01-01T00:02:00Z",
+  "check": "baseline_compare",
+  "status": "pass",
+  "summary": "Synthetic baseline matched the current snapshot.",
+  "evidence": [
+    "lab/fixtures/defense_ops/event.valid.json"
+  ],
+  "attributes": {
+    "comparable": true,
+    "drift_count": 0
+  }
+}

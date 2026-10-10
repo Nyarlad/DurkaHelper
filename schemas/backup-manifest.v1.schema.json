@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:durkahelper:schema:backup-manifest:v1",
+  "title": "DurkaHelper backup manifest v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "tool", "created_at", "profile", "root", "entries", "summary", "bundle_sha256"],
+  "properties": {
+    "schema": {"const": "durkahelper.backup-manifest.v1"},
+    "tool": {"$ref": "#/$defs/tool"},
+    "created_at": {"type": "string", "format": "date-time"},
+    "profile": {"$ref": "#/$defs/profileRef"},
+    "root": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "entries": {
+      "type": "array", "minItems": 1, "maxItems": 100000,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["source", "stored", "kind", "size", "sha256", "mode", "mtime_ns"],
+        "properties": {
+          "source": {"$ref": "#/$defs/portablePathOrDot"},
+          "stored": {"type": "string", "pattern": "^files/[0-9]{6}\\.bin$"},
+          "kind": {"enum": ["file", "tree", "native_dump"]},
+          "size": {"type": "integer", "minimum": 0, "maximum": 4294967296},
+          "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+          "mode": {"type": "integer", "minimum": 0, "maximum": 4095},
+          "mtime_ns": {"type": "integer", "minimum": 0, "maximum": 253402300799999999999}
+        }
+      }
+    },
+    "summary": {
+      "type": "object", "additionalProperties": false,
+      "required": ["files", "total_bytes"],
+      "properties": {
+        "files": {"type": "integer", "minimum": 1, "maximum": 100000},
+        "total_bytes": {"type": "integer", "minimum": 0, "maximum": 107374182400}
+      }
+    },
+    "bundle_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  },
+  "$defs": {
+    "tool": {
+      "type": "object", "additionalProperties": false, "required": ["name", "version"],
+      "properties": {
+        "name": {"const": "DurkaHelper defense_ops"},
+        "version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:[-+][0-9A-Za-z.-]+)?$"}
+      }
+    },
+    "profileRef": {
+      "type": "object", "additionalProperties": false, "required": ["name", "sha256"],
+      "properties": {
+        "name": {"type": "string", "minLength": 1, "maxLength": 120},
+        "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+      }
+    },
+    "portablePathOrDot": {
+      "$comment": "The runtime additionally enforces NFC, case-fold uniqueness, reserved-device names, and deterministic ordering.",
+      "type": "string", "minLength": 1, "maxLength": 1024,
+      "pattern": "^(?:\\.|(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))(?!.*(?:^|/)(?:[Cc][Oo][Nn]|[Pp][Rr][Nn]|[Aa][Uu][Xx]|[Nn][Uu][Ll]|[Cc][Oo][Mm][1-9]|[Ll][Pp][Tt][1-9])(?:[ .]*\\.[^/]*)?(?:/|$))(?!.*\\\\)(?!.*:)(?!.*[<>\"|?*])(?!.+(?:[. ])(?:/|$))[^/]+(?:/[^/]+)*)$"
+    }
+  }
+}

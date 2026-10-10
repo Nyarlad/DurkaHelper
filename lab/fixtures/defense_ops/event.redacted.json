@@ -1,0 +1,15 @@
+{
+  "schema": "durkahelper.event.v1",
+  "id": "event-synthetic-redacted-0001",
+  "timestamp": "2026-01-01T00:01:00Z",
+  "source": "synthetic-triage",
+  "kind": "suspicious_activity",
+  "severity": "medium",
+  "summary": "Synthetic triage event exported with sensitive details removed.",
+  "attributes": {
+    "detail": "[REDACTED]",
+    "record_count": 2,
+    "redacted": true,
+    "source_address": "127.0.0.1"
+  }
+}

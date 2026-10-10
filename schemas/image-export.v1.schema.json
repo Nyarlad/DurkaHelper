@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "durkahelper.image-export.v1",
+  "title": "Private image export profile (not redistribution authorization)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "release_commit", "images", "max_archive_bytes", "max_total_bytes", "timeout_seconds"],
+  "properties": {
+    "schema": {"const": "durkahelper.image-export.v1"},
+    "release_commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "max_archive_bytes": {"type": "integer", "minimum": 1, "maximum": 34359738368},
+    "max_total_bytes": {"type": "integer", "minimum": 1, "maximum": 103079215104},
+    "timeout_seconds": {"type": "integer", "minimum": 1, "maximum": 1800},
+    "images": {
+      "type": "array", "minItems": 1, "maxItems": 64,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["id", "component", "architecture", "image_id", "license", "redistribution", "reviewed_for_secrets"],
+        "properties": {
+          "id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9_.-]{0,63}$"},
+          "component": {"type": "string", "pattern": "^[a-z0-9][a-z0-9_.-]{0,63}$"},
+          "architecture": {"enum": ["linux/amd64", "linux/arm64"]},
+          "image_id": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+          "license": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9.+() -]{0,127}$"},
+          "redistribution": {"const": "local-only"},
+          "reviewed_for_secrets": {"const": true}
+        }
+      }
+    }
+  }
+}

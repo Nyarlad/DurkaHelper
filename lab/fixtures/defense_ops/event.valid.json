@@ -1,0 +1,14 @@
+{
+  "schema": "durkahelper.event.v1",
+  "id": "event-synthetic-health-0001",
+  "timestamp": "2026-01-01T00:00:00Z",
+  "source": "synthetic-health",
+  "kind": "service_health",
+  "severity": "info",
+  "summary": "Synthetic loopback health check passed.",
+  "attributes": {
+    "endpoint": "http://127.0.0.1:8080/health",
+    "healthy": true,
+    "status_code": 200
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "schema": "durkahelper.deployment-profile.v1",
+  "platform": {"os": "darwin", "architecture": "arm64", "runtime": "docker-desktop"},
+  "bind_address": "127.0.0.1",
+  "ports": {"farm": 8080, "neo": 5005, "packmate": 65000},
+  "allow_amd64_emulation": false,
+  "farm": {
+    "teams": {"Synthetic": "192.0.2.1"},
+    "flag_format": "[A-Z0-9]{31}=",
+    "protocol": "ructf_http",
+    "protocol_settings": {"SYSTEM_URL": "http://receiver.example.invalid/flags", "SYSTEM_TOKEN": "REPLACE_WITH_PRIVATE_COMPETITION_TOKEN"},
+    "submit_limit": 10, "submit_period": 2, "flag_lifetime": 300
+  },
+  "packmate": {"mode": "FILE", "local_ip": "192.0.2.1", "pcap_file": "capture.pcap", "interface": "", "retention_minutes": 60}
+}

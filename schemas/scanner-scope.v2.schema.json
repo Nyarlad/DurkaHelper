@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:durkahelper:schema:scanner-scope:v2",
+  "title": "Scanner comparability scope v2",
+  "$comment": "SHA256 covers canonical ASCII JSON with sorted keys and compact separators, excluding the sha256 field. Root is an opaque identity, not a path. Context digest covers normalized context including the empty default. A v1/v2 or context/semantics mismatch is incomparable, not a clean result. Exclusions must also be sorted/unique and all digests are verified by runtime.",
+  "type": "object", "additionalProperties": false,
+  "required": ["schema", "root", "rules_sha256", "exclude", "limits", "path_semantics", "semantic_revision", "context_sha256", "sha256"],
+  "properties": {
+    "schema": {"const": "durkahelper.scanner-scope.v2"},
+    "root": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "rules_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "context_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "path_semantics": {"const": "root-relative-posix.v1"},
+    "semantic_revision": {"enum": ["bounded-source-signals.v2", "bounded-source-signals.v3"]},
+    "exclude": {"type": "array", "maxItems": 10000, "uniqueItems": true, "items": {"type": "string", "maxLength": 4096, "pattern": "^[^\u0000]*$"}},
+    "limits": {
+      "type": "object", "additionalProperties": false,
+      "required": ["max_bytes", "max_files", "max_findings"],
+      "properties": {
+        "max_bytes": {"type": "integer", "minimum": 1, "maximum": 9223372036854775807},
+        "max_files": {"type": "integer", "minimum": 1, "maximum": 9223372036854775807},
+        "max_findings": {"type": "integer", "minimum": 1, "maximum": 9223372036854775807}
+      }
+    }
+  }
+}

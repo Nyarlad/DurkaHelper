@@ -1,0 +1,4 @@
+[
+  {"name": "local health", "url": "http://127.0.0.1:8080/health", "status": 200, "contains": "ok"},
+  {"name": "local version", "url": "http://127.0.0.1:8080/version", "status": 200, "contains": "demo"}
+]

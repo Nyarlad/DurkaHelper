@@ -1,0 +1,46 @@
+{
+  "schema": "durkahelper.profile.v1",
+  "name": "synthetic-defense-ops",
+  "snapshot": {
+    "adapters": [
+      "platform"
+    ],
+    "include": [
+      "lab/fixtures/defense_ops/*.json"
+    ],
+    "exclude": [],
+    "max_files": 32,
+    "max_file_bytes": 262144,
+    "max_total_bytes": 1048576
+  },
+  "health": [
+    {
+      "name": "synthetic-loopback-health",
+      "url": "http://127.0.0.1:8080/health",
+      "status": 200,
+      "contains": "ok",
+      "timeout": 2.0
+    }
+  ],
+  "backup": {
+    "entries": [
+      {
+        "path": "lab/fixtures/defense_ops",
+        "kind": "tree"
+      }
+    ],
+    "exclude": [],
+    "max_files": 32,
+    "max_file_bytes": 262144,
+    "max_total_bytes": 1048576
+  },
+  "evidence": {
+    "allow_extensions": [
+      ".json",
+      ".jsonl"
+    ],
+    "max_files": 32,
+    "max_file_bytes": 262144,
+    "max_total_bytes": 1048576
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:durkahelper:schema:approved-drift:v1",
+  "title": "DurkaHelper reviewed approved drift v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "id",
+    "reviewed_at",
+    "baseline_sha256",
+    "current_sha256",
+    "drift"
+  ],
+  "properties": {
+    "schema": {"const": "durkahelper.approved-drift.v1"},
+    "id": {
+      "type": "string",
+      "minLength": 8,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "reviewed_at": {"type": "string", "format": "date-time"},
+    "baseline_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "current_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "drift": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "adapters_changed",
+        "files_added",
+        "files_content_changed",
+        "files_metadata_changed",
+        "files_removed"
+      ],
+      "properties": {
+        "adapters_changed": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"enum": ["platform", "processes", "listeners", "services", "compose"]}
+        },
+        "files_added": {"$ref": "#/$defs/paths"},
+        "files_content_changed": {"$ref": "#/$defs/paths"},
+        "files_metadata_changed": {"$ref": "#/$defs/paths"},
+        "files_removed": {"$ref": "#/$defs/paths"}
+      }
+    }
+  },
+  "$defs": {
+    "paths": {
+      "type": "array",
+      "maxItems": 100000,
+      "uniqueItems": true,
+      "$comment": "Runtime additionally requires sorted, NFC, portable relative POSIX paths.",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 1024,
+        "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))(?!.*\\\\)(?!.*:)[^/]+(?:/[^/]+)*$"
+      }
+    }
+  }
+}

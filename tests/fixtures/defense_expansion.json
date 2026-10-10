@@ -1,0 +1,992 @@
+{
+  "schema_version": 1,
+  "description": "Independently authored 1.7.0 detector regressions. Source is inert data, never executed. Authored rule examples are not counted here.",
+  "cases": [
+    {
+      "id": "py-auth-decorator-python-positive-1",
+      "language": "python",
+      "source": "import flask as web\nfrom flask_login import login_required as authorized\nviews=web.Blueprint('views', __name__)\n@authorized\n@views.post('/notes')\ndef create_note():\n    pass",
+      "expected": [
+        "PY-AUTH-DECORATOR"
+      ],
+      "forbidden": [],
+      "note": "Independent positive regression; inert source text, never executed."
+    },
+    {
+      "id": "py-auth-decorator-python-positive-2",
+      "language": "python",
+      "source": "from flask import Flask as Application\nimport flask_login as auth\nserver=Application('service')\n@auth.login_required\n@server.get('/files')\ndef files():\n    return []",
+      "expected": [
+        "PY-AUTH-DECORATOR"
+      ],
+      "forbidden": [],
+      "note": "Independent positive regression; inert source text, never executed."
+    },
+    {
+      "id": "py-auth-decorator-python-negative-1",
+      "language": "python",
+      "source": "from flask import Flask\nfrom flask_login import login_required\nsite=Flask('service')\n@site.route('/files')\n@login_required\ndef files():\n    return []",
+      "expected": [],
+      "forbidden": [
+        "PY-AUTH-DECORATOR"
+      ],
+      "note": "Independent safe/context-negative regression; no security verdict about other operations."
+    },
+    {
+      "id": "py-auth-decorator-python-negative-2",
+      "language": "python",
+      "source": "from flask import Flask\nfrom flask_login import login_required\nsite=Flask('service')\nlogin_required=custom_decorator\n@login_required\n@site.route('/public')\ndef files():\n    pass",
+      "expected": [],
+      "forbidden": [
+        "PY-AUTH-DECORATOR"
+      ],
+      "note": "Independent safe/context-negative regression; no security verdict about other operations."
+    },
+    {
+      "id": "py-auth-decorator-python-negative-3",
+      "language": "python",
+      "source": "from flask import Flask\nfrom flask_login import login_required\nsite=Flask('service')\nsite=custom_router\n@login_required\n@site.route('/custom')\ndef files():\n    pass",
+      "expected": [],
+      "forbidden": [
+        "PY-AUTH-DECORATOR"
+      ],
+      "note": "Independent safe/context-negative regression; no security verdict about other operations."
+    },
+    {
+      "id": "py-auth-decorator-python-negative-4",
+      "language": "python",
+      "source": "# @login_required\ntext='@app.route(...)'\ndef ordinary():\n    pass",
+      "expected": [],
+      "forbidden": [
+        "PY-AUTH-DECORATOR"
+      ],
+      "note": "Independent safe/context-negative regression; no security verdict about other operations."
+    },
+    {
+      "id": "py-log-credentials-python-positive-1",
+      "language": "python",
+      "source": "import logging as audit\naudit.error('key was %s', record.api_key)",
+      "expected": [
+        "PY-LOG-CREDENTIALS"
+      ],
+      "forbidden": [],
+      "note": "Independent positive regression; inert source text, never executed."
+    },
+    {
+      "id": "py-log-credentials-python-positive-2",
+      "language": "python",
+      "source": "from logging import getLogger as get_log\nlog=get_log('service')\nlog.debug(f'failed login: {request.headers[\"Authorization\"]}')",
+      "expected": [
+        "PY-LOG-CREDENTIALS"
+      ],
+      "forbidden": [],
+      "note": "Independent positive regression; inert source text, never executed."
+    },
+    {
+      "id": "py-log-credentials-python-negative-1",
+      "language": "python",
+      "source": "import logging\nlogging.info('authentication rejected')",
+      "expected": [],
+      "forbidden": [
+        "PY-LOG-CREDENTIALS"
+      ],
+      "note": "Independent safe/context-negative regression; no security verdict about other operations."
+    },
+    {
+      "id": "py-log-credentials-python-negative-2",
+      "language": "python",
+      "source": "import logging\nlogger=logging.getLogger('service')\nlogger.warning('key %s', redact(token))",
+      "expected": [],
+      "forbidden": [
+        "PY-LOG-CREDENTIALS"
+      ],
+      "note": "Independent safe/context-negative regression; no security verdict about other operations."
+    },
+    {
+      "id": "py-log-credentials-python-negative-3",
+      "language": "python",
+      "source": "import logging\ndef run(logging):\n    logging.error(password)",
+      "expected": [],
+      "forbidden": [
+        "PY-LOG-CREDENTIALS"
+      ],
+      "note": "Independent safe/context-negative regression; no security verdict about other operations."
+    },
+    {
+      "id": "py-log-credentials-python-negative-4",
+      "language": "python",
+      "source": "import logging\nlogging=custom_logger\nlogging.warning(token)",
+      "expected": [],
+      "forbidden": [
+        "PY-LOG-CREDENTIALS"
+      ],
+      "note": "Independent safe/context-negative regression; no security verdict about other operations."
+    },
+    {
+      "id": "py-log-credentials-python-negative-5",
+      "language": "python",
+      "source": "# logging.info(password)\nmessage='logging.debug(token)'",
+      "expected": [],
+      "forbidden": [
+        "PY-LOG-CREDENTIALS"
+      ],
+      "note": "Independent safe/context-negative regression; no security verdict about other operations."
+    },
+    {
+      "id": "js-redirect-input-javascript-positive-1",
+      "language": "javascript",
+      "source": "response.redirect(303, request.body.destination);",
+      "expected": [
+        "JS-REDIRECT-INPUT"
+      ],
+      "forbidden": [],
+      "note": "Independent positive regression; inert source text, never executed."
+    },
+    {
+      "id": "js-redirect-input-javascript-positive-2",
+      "language": "javascript",
+      "source": "res.redirect(\n req.params.returnPath\n);",
+      "expected": [
+        "JS-REDIRECT-INPUT"
+      ],
+      "forbidden": [],
+      "note": "Independent positive regression; inert source text, never executed."
+    },
+    {
+      "id": "js-redirect-input-javascript-negative-1",
+      "language": "javascript",
+      "source": "res.redirect(302, '/notes');",
+      "expected": [],
+      "forbidden": [
+        "JS-REDIRECT-INPUT"
+      ],
+      "note": "Independent safe/context-negative regression; no security verdict about other operations."
+    },
+    {
+      "id": "js-redirect-input-javascript-negative-2",
+      "language": "javascript",
+      "source": "custom.redirect(req.query.next);",
+      "expected": [],
+      "forbidden": [
+        "JS-REDIRECT-INPUT"
+      ],
+      "note": "Independent safe/context-negative regression; no security verdict about other operations."
+    },
+    {
+      "id": "js-redirect-input-javascript-negative-3",
+      "language": "javascript",
+      "source": "// res.redirect(req.query.bad)\nconst example = 'response.redirect(request.body.next)';",
+      "expected": [],
+      "forbidden": [
+        "JS-REDIRECT-INPUT"
+      ],
+      "note": "Independent safe/context-negative regression; no security verdict about other operations."
+    },
+    {
+      "id": "js-redirect-input-javascript-negative-4",
+      "language": "javascript",
+      "source": "/* res.redirect(req.query.next); */",
+      "expected": [],
+      "forbidden": [
+        "JS-REDIRECT-INPUT"
+      ],
+      "note": "Independent safe/context-negative regression; no security verdict about other operations."
+    },
+    {
+      "id": "php-ldap-filter-php-positive-1",
+      "language": "php",
+      "source": "ldap_list($directory, $dn, \"(mail=\" . $mail . \")\");",
+      "expected": [
+        "PHP-LDAP-FILTER"
+      ],
+      "forbidden": [],
+      "note": "Independent positive regression; inert source text, never executed."
+    },
+    {
+      "id": "php-ldap-filter-php-positive-2",
+      "language": "php",
+      "source": "ldap_read($ld, $baseDn, '(cn=' . $lookup . ')');",
+      "expected": [
+        "PHP-LDAP-FILTER"
+      ],
+      "forbidden": [],
+      "note": "Independent positive regression; inert source text, never executed."
+    },
+    {
+      "id": "php-ldap-filter-php-negative-1",
+      "language": "php",
+      "source": "ldap_search($ld, $dn, '(uid=known)');",
+      "expected": [],
+      "forbidden": [
+        "PHP-LDAP-FILTER"
+      ],
+      "note": "Independent safe/context-negative regression; no security verdict about other operations."
+    },
+    {
+      "id": "php-ldap-filter-php-negative-2",
+      "language": "php",
+      "source": "ldap_search($ld, $dn, '(uid=' . ldap_escape($lookup, '', LDAP_ESCAPE_FILTER) . ')');",
+      "expected": [],
+      "forbidden": [
+        "PHP-LDAP-FILTER"
+      ],
+      "note": "Independent safe/context-negative regression; no security verdict about other operations."
+    },
+    {
+      "id": "php-ldap-filter-php-negative-3",
+      "language": "php",
+      "source": "// ldap_search($ld, $dn, '(uid=' . $lookup);\n$note = \"ldap_read($a, $b, '(uid=' . $c)\";",
+      "expected": [],
+      "forbidden": [
+        "PHP-LDAP-FILTER"
+      ],
+      "note": "Independent safe/context-negative regression; no security verdict about other operations."
+    },
+    {
+      "id": "go-upload-path-go-positive-1",
+      "language": "go",
+      "source": "destination := filepath.Join(storage, fileHeader.Filename)",
+      "expected": [
+        "GO-UPLOAD-PATH"
+      ],
+      "forbidden": [],
+      "note": "Independent positive regression; inert source text, never executed."
+    },
+    {
+      "id": "go-upload-path-go-positive-2",
+      "language": "go",
+      "source": "p := filepath.Join(\n base,\n file.Filename\n)",
+      "expected": [
+        "GO-UPLOAD-PATH"
+      ],
+      "forbidden": [],
+      "note": "Independent positive regression; inert source text, never executed."
+    },
+    {
+      "id": "go-upload-path-go-negative-1",
+      "language": "go",
+      "source": "p := filepath.Join(storage, generatedName)",
+      "expected": [],
+      "forbidden": [
+        "GO-UPLOAD-PATH"
+      ],
+      "note": "Independent safe/context-negative regression; no security verdict about other operations."
+    },
+    {
+      "id": "go-upload-path-go-negative-2",
+      "language": "go",
+      "source": "p := filepath.Join(storage, header.SafeName)",
+      "expected": [],
+      "forbidden": [
+        "GO-UPLOAD-PATH"
+      ],
+      "note": "Independent safe/context-negative regression; no security verdict about other operations."
+    },
+    {
+      "id": "go-upload-path-go-negative-3",
+      "language": "go",
+      "source": "// filepath.Join(root, header.Filename)\nvar example = \"filepath.Join(root, file.Filename)\"",
+      "expected": [],
+      "forbidden": [
+        "GO-UPLOAD-PATH"
+      ],
+      "note": "Independent safe/context-negative regression; no security verdict about other operations."
+    },
+    {
+      "id": "java-ldap-filter-java-positive-1",
+      "language": "java",
+      "source": "context.search(rootDn, \"(mail=\" + address + \")\", limits);",
+      "expected": [
+        "JAVA-LDAP-FILTER"
+      ],
+      "forbidden": [],
+      "note": "Independent positive regression; inert source text, never executed."
+    },
+    {
+      "id": "java-ldap-filter-java-positive-2",
+      "language": "java",
+      "source": "dirContext.search(baseName, \"(cn=\" + supplied + \")\", searchControls);",
+      "expected": [
+        "JAVA-LDAP-FILTER"
+      ],
+      "forbidden": [],
+      "note": "Independent positive regression; inert source text, never executed."
+    },
+    {
+      "id": "java-ldap-filter-java-negative-1",
+      "language": "java",
+      "source": "ctx.search(base, \"(uid={0})\", new Object[] { uid }, controls);",
+      "expected": [],
+      "forbidden": [
+        "JAVA-LDAP-FILTER"
+      ],
+      "note": "Independent safe/context-negative regression; no security verdict about other operations."
+    },
+    {
+      "id": "java-ldap-filter-java-negative-2",
+      "language": "java",
+      "source": "custom.search(base, \"(uid=\" + name + \")\", controls);",
+      "expected": [],
+      "forbidden": [
+        "JAVA-LDAP-FILTER"
+      ],
+      "note": "Independent safe/context-negative regression; no security verdict about other operations."
+    },
+    {
+      "id": "java-ldap-filter-java-negative-3",
+      "language": "java",
+      "source": "// ctx.search(base, \"(uid=\" + uid, controls);\nString help = \"context.search(base, filter)\";",
+      "expected": [],
+      "forbidden": [
+        "JAVA-LDAP-FILTER"
+      ],
+      "note": "Independent safe/context-negative regression; no security verdict about other operations."
+    },
+    {
+      "id": "java-ldap-filter-java-negative-4",
+      "language": "java",
+      "source": "/* context.search(base, \"(cn=\" + name, controls); */",
+      "expected": [],
+      "forbidden": [
+        "JAVA-LDAP-FILTER"
+      ],
+      "note": "Independent safe/context-negative regression; no security verdict about other operations."
+    },
+    {
+      "id": "cs-ldap-filter-csharp-positive-1",
+      "language": "csharp",
+      "source": "var lookup = new System.DirectoryServices.DirectorySearcher(\"(mail=\" + address + \")\");",
+      "expected": [
+        "CS-LDAP-FILTER"
+      ],
+      "forbidden": [],
+      "note": "Independent positive regression; inert source text, never executed."
+    },
+    {
+      "id": "cs-ldap-filter-csharp-positive-2",
+      "language": "csharp",
+      "source": "using var ds = new DirectorySearcher(\n \"(cn=\" + supplied + \")\"\n);",
+      "expected": [
+        "CS-LDAP-FILTER"
+      ],
+      "forbidden": [],
+      "note": "Independent positive regression; inert source text, never executed."
+    },
+    {
+      "id": "cs-ldap-filter-csharp-negative-1",
+      "language": "csharp",
+      "source": "var query = new DirectorySearcher(\"(uid=known)\");",
+      "expected": [],
+      "forbidden": [
+        "CS-LDAP-FILTER"
+      ],
+      "note": "Independent safe/context-negative regression; no security verdict about other operations."
+    },
+    {
+      "id": "cs-ldap-filter-csharp-negative-2",
+      "language": "csharp",
+      "source": "var query = new DirectorySearcher(BuildLdapFilter(name));",
+      "expected": [],
+      "forbidden": [
+        "CS-LDAP-FILTER"
+      ],
+      "note": "Independent safe/context-negative regression; no security verdict about other operations."
+    },
+    {
+      "id": "cs-ldap-filter-csharp-negative-3",
+      "language": "csharp",
+      "source": "// new DirectorySearcher(\"(uid=\" + user)\nvar note = \"DirectorySearcher\";",
+      "expected": [],
+      "forbidden": [
+        "CS-LDAP-FILTER"
+      ],
+      "note": "Independent safe/context-negative regression; no security verdict about other operations."
+    },
+    {
+      "id": "ruby-redirect-input-ruby-positive-1",
+      "language": "ruby",
+      "source": "redirect_to(request.params[:return_path])",
+      "expected": [
+        "RUBY-REDIRECT-INPUT"
+      ],
+      "forbidden": [],
+      "note": "Independent positive regression; inert source text, never executed."
+    },
+    {
+      "id": "ruby-redirect-input-ruby-positive-2",
+      "language": "ruby",
+      "source": "redirect_to params['destination']",
+      "expected": [
+        "RUBY-REDIRECT-INPUT"
+      ],
+      "forbidden": [],
+      "note": "Independent positive regression; inert source text, never executed."
+    },
+    {
+      "id": "ruby-redirect-input-ruby-negative-1",
+      "language": "ruby",
+      "source": "redirect_to dashboard_path",
+      "expected": [],
+      "forbidden": [
+        "RUBY-REDIRECT-INPUT"
+      ],
+      "note": "Independent safe/context-negative regression; no security verdict about other operations."
+    },
+    {
+      "id": "ruby-redirect-input-ruby-negative-2",
+      "language": "ruby",
+      "source": "redirect_to '/notes'",
+      "expected": [],
+      "forbidden": [
+        "RUBY-REDIRECT-INPUT"
+      ],
+      "note": "Independent safe/context-negative regression; no security verdict about other operations."
+    },
+    {
+      "id": "ruby-redirect-input-ruby-negative-3",
+      "language": "ruby",
+      "source": "# redirect_to params[:next]\ntext = 'redirect_to(params[:next])'",
+      "expected": [],
+      "forbidden": [
+        "RUBY-REDIRECT-INPUT"
+      ],
+      "note": "Independent safe/context-negative regression; no security verdict about other operations."
+    },
+    {
+      "id": "rust-unbounded-read-rust-positive-1",
+      "language": "rust",
+      "source": "socket.read_to_string(&mut received)?;",
+      "expected": [
+        "RUST-UNBOUNDED-READ"
+      ],
+      "forbidden": [],
+      "note": "Independent positive regression; inert source text, never executed."
+    },
+    {
+      "id": "rust-unbounded-read-rust-positive-2",
+      "language": "rust",
+      "source": "reader.read_to_end(&mut data).unwrap();",
+      "expected": [
+        "RUST-UNBOUNDED-READ"
+      ],
+      "forbidden": [],
+      "note": "Independent positive regression; inert source text, never executed."
+    },
+    {
+      "id": "rust-unbounded-read-rust-negative-1",
+      "language": "rust",
+      "source": "let mut bounded = socket.take(limit + 1);\nbounded.read_to_string(&mut text)?;",
+      "expected": [],
+      "forbidden": [
+        "RUST-UNBOUNDED-READ"
+      ],
+      "note": "Independent safe/context-negative regression; no security verdict about other operations."
+    },
+    {
+      "id": "rust-unbounded-read-rust-negative-2",
+      "language": "rust",
+      "source": "parser.read_to_end(&mut fixed)?;",
+      "expected": [],
+      "forbidden": [
+        "RUST-UNBOUNDED-READ"
+      ],
+      "note": "Independent safe/context-negative regression; no security verdict about other operations."
+    },
+    {
+      "id": "rust-unbounded-read-rust-negative-3",
+      "language": "rust",
+      "source": "// socket.read_to_end(&mut bytes)?;\nlet note = \"stream.read_to_string(&mut text)\";",
+      "expected": [],
+      "forbidden": [
+        "RUST-UNBOUNDED-READ"
+      ],
+      "note": "Independent safe/context-negative regression; no security verdict about other operations."
+    },
+    {
+      "id": "c-copy-length-native-positive-1",
+      "language": "native",
+      "source": "memmove(output, name, strnlen(name, maximum) + 1);",
+      "expected": [
+        "C-COPY-LENGTH"
+      ],
+      "forbidden": [],
+      "note": "Independent positive regression; inert source text, never executed."
+    },
+    {
+      "id": "c-copy-length-native-positive-2",
+      "language": "native",
+      "source": "memcpy(\n buffer, text,\n strlen(text)\n);",
+      "expected": [
+        "C-COPY-LENGTH"
+      ],
+      "forbidden": [],
+      "note": "Independent positive regression; inert source text, never executed."
+    },
+    {
+      "id": "c-copy-length-native-negative-1",
+      "language": "native",
+      "source": "memcpy(buffer, text, checked_length);",
+      "expected": [],
+      "forbidden": [
+        "C-COPY-LENGTH"
+      ],
+      "note": "Independent safe/context-negative regression; no security verdict about other operations."
+    },
+    {
+      "id": "c-copy-length-native-negative-2",
+      "language": "native",
+      "source": "memmove(dst, src, sizeof known_array);",
+      "expected": [],
+      "forbidden": [
+        "C-COPY-LENGTH"
+      ],
+      "note": "Independent safe/context-negative regression; no security verdict about other operations."
+    },
+    {
+      "id": "c-copy-length-native-negative-3",
+      "language": "native",
+      "source": "/* memcpy(buffer, data, strlen(data)); */\nconst char *s = \"memcpy(buffer,data,strlen(data))\";",
+      "expected": [],
+      "forbidden": [
+        "C-COPY-LENGTH"
+      ],
+      "note": "Independent safe/context-negative regression; no security verdict about other operations."
+    },
+    {
+      "id": "cfg-cookie-flags-config-positive-1",
+      "language": "config",
+      "source": "SESSION_COOKIE_SECURE = false",
+      "expected": [
+        "CFG-COOKIE-FLAGS"
+      ],
+      "forbidden": [],
+      "note": "Independent positive regression; inert source text, never executed."
+    },
+    {
+      "id": "cfg-cookie-flags-config-positive-2",
+      "language": "config",
+      "source": "CSRF_COOKIE_SECURE = 0",
+      "expected": [
+        "CFG-COOKIE-FLAGS"
+      ],
+      "forbidden": [],
+      "note": "Independent positive regression; inert source text, never executed."
+    },
+    {
+      "id": "cfg-cookie-flags-config-negative-1",
+      "language": "config",
+      "source": "SESSION_COOKIE_HTTPONLY = true",
+      "expected": [],
+      "forbidden": [
+        "CFG-COOKIE-FLAGS"
+      ],
+      "note": "Independent safe/context-negative regression; no security verdict about other operations."
+    },
+    {
+      "id": "cfg-cookie-flags-config-negative-2",
+      "language": "config",
+      "source": "SESSION_COOKIE_SECURE = true",
+      "expected": [],
+      "forbidden": [
+        "CFG-COOKIE-FLAGS"
+      ],
+      "note": "Independent safe/context-negative regression; no security verdict about other operations."
+    },
+    {
+      "id": "cfg-cookie-flags-config-negative-3",
+      "language": "config",
+      "source": "# SESSION_COOKIE_HTTPONLY = false\nexample = \"SESSION_COOKIE_SECURE = false\"",
+      "expected": [],
+      "forbidden": [
+        "CFG-COOKIE-FLAGS"
+      ],
+      "note": "Independent safe/context-negative regression; no security verdict about other operations."
+    },
+    {
+      "id": "cfg-cookie-flags-python-positive-1",
+      "language": "python",
+      "source": "SESSION_COOKIE_SECURE = False",
+      "expected": [
+        "CFG-COOKIE-FLAGS"
+      ],
+      "forbidden": [],
+      "note": "Independent positive regression; inert source text, never executed."
+    },
+    {
+      "id": "cfg-cookie-flags-python-positive-2",
+      "language": "python",
+      "source": "CSRF_COOKIE_SECURE = 0",
+      "expected": [
+        "CFG-COOKIE-FLAGS"
+      ],
+      "forbidden": [],
+      "note": "Independent positive regression; inert source text, never executed."
+    },
+    {
+      "id": "cfg-cookie-flags-python-negative-1",
+      "language": "python",
+      "source": "SESSION_COOKIE_HTTPONLY = True",
+      "expected": [],
+      "forbidden": [
+        "CFG-COOKIE-FLAGS"
+      ],
+      "note": "Independent safe/context-negative regression; no security verdict about other operations."
+    },
+    {
+      "id": "cfg-cookie-flags-python-negative-2",
+      "language": "python",
+      "source": "SESSION_COOKIE_SECURE = True",
+      "expected": [],
+      "forbidden": [
+        "CFG-COOKIE-FLAGS"
+      ],
+      "note": "Independent safe/context-negative regression; no security verdict about other operations."
+    },
+    {
+      "id": "cfg-cookie-flags-python-negative-3",
+      "language": "python",
+      "source": "# SESSION_COOKIE_HTTPONLY = False\nexample = \"SESSION_COOKIE_SECURE = False\"",
+      "expected": [],
+      "forbidden": [
+        "CFG-COOKIE-FLAGS"
+      ],
+      "note": "Independent safe/context-negative regression; no security verdict about other operations."
+    },
+    {
+      "id": "cfg-docker-tcp-shell-positive-1",
+      "language": "shell",
+      "source": "dockerd --host=tcp://[::]:2376",
+      "expected": [
+        "CFG-DOCKER-TCP"
+      ],
+      "forbidden": [],
+      "note": "Independent positive regression; inert source text, never executed."
+    },
+    {
+      "id": "cfg-docker-tcp-shell-positive-2",
+      "language": "shell",
+      "source": "dockerd --debug -H tcp://0.0.0.0:4243",
+      "expected": [
+        "CFG-DOCKER-TCP"
+      ],
+      "forbidden": [],
+      "note": "Independent positive regression; inert source text, never executed."
+    },
+    {
+      "id": "cfg-docker-tcp-shell-negative-1",
+      "language": "shell",
+      "source": "dockerd -H unix:///var/run/docker.sock",
+      "expected": [],
+      "forbidden": [
+        "CFG-DOCKER-TCP"
+      ],
+      "note": "Independent safe/context-negative regression; no security verdict about other operations."
+    },
+    {
+      "id": "cfg-docker-tcp-shell-negative-2",
+      "language": "shell",
+      "source": "dockerd --host=tcp://127.0.0.1:2376",
+      "expected": [],
+      "forbidden": [
+        "CFG-DOCKER-TCP"
+      ],
+      "note": "Independent safe/context-negative regression; no security verdict about other operations."
+    },
+    {
+      "id": "cfg-docker-tcp-shell-negative-3",
+      "language": "shell",
+      "source": "# dockerd -H tcp://0.0.0.0:2375\necho \"dockerd --host=tcp://0.0.0.0:2375\"",
+      "expected": [],
+      "forbidden": [
+        "CFG-DOCKER-TCP"
+      ],
+      "note": "Independent safe/context-negative regression; no security verdict about other operations."
+    },
+    {
+      "id": "cfg-docker-tcp-docker-positive-1",
+      "language": "docker",
+      "source": "RUN dockerd --host=tcp://[::]:2376",
+      "expected": [
+        "CFG-DOCKER-TCP"
+      ],
+      "forbidden": [],
+      "note": "Independent positive regression; inert source text, never executed."
+    },
+    {
+      "id": "cfg-docker-tcp-docker-positive-2",
+      "language": "docker",
+      "source": "RUN dockerd --debug -H tcp://0.0.0.0:4243",
+      "expected": [
+        "CFG-DOCKER-TCP"
+      ],
+      "forbidden": [],
+      "note": "Independent positive regression; inert source text, never executed."
+    },
+    {
+      "id": "cfg-docker-tcp-docker-negative-1",
+      "language": "docker",
+      "source": "RUN dockerd -H unix:///var/run/docker.sock",
+      "expected": [],
+      "forbidden": [
+        "CFG-DOCKER-TCP"
+      ],
+      "note": "Independent safe/context-negative regression; no security verdict about other operations."
+    },
+    {
+      "id": "cfg-docker-tcp-docker-negative-2",
+      "language": "docker",
+      "source": "RUN dockerd --host=tcp://127.0.0.1:2376",
+      "expected": [],
+      "forbidden": [
+        "CFG-DOCKER-TCP"
+      ],
+      "note": "Independent safe/context-negative regression; no security verdict about other operations."
+    },
+    {
+      "id": "cfg-docker-tcp-docker-negative-3",
+      "language": "docker",
+      "source": "# dockerd -H tcp://0.0.0.0:2375\nRUN echo \"dockerd --host=tcp://0.0.0.0:2375\"",
+      "expected": [],
+      "forbidden": [
+        "CFG-DOCKER-TCP"
+      ],
+      "note": "Independent safe/context-negative regression; no security verdict about other operations."
+    },
+    {
+      "id": "cfg-floating-image-docker-positive-1",
+      "language": "docker",
+      "source": "FROM --platform=linux/arm64 registry.example.invalid/team/ui:latest AS build",
+      "expected": [
+        "CFG-FLOATING-IMAGE"
+      ],
+      "forbidden": [],
+      "note": "Independent positive regression; inert source text, never executed."
+    },
+    {
+      "id": "cfg-floating-image-docker-positive-2",
+      "language": "docker",
+      "source": "FROM registry.example.invalid:5000/tools/worker:latest",
+      "expected": [
+        "CFG-FLOATING-IMAGE"
+      ],
+      "forbidden": [],
+      "note": "Independent positive regression; inert source text, never executed."
+    },
+    {
+      "id": "cfg-floating-image-docker-negative-1",
+      "language": "docker",
+      "source": "FROM registry.example.invalid/app:2.0",
+      "expected": [],
+      "forbidden": [
+        "CFG-FLOATING-IMAGE"
+      ],
+      "note": "Independent safe/context-negative regression; no security verdict about other operations."
+    },
+    {
+      "id": "cfg-floating-image-docker-negative-2",
+      "language": "docker",
+      "source": "FROM registry.example.invalid/app:latest@sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "expected": [],
+      "forbidden": [
+        "CFG-FLOATING-IMAGE"
+      ],
+      "note": "Independent safe/context-negative regression; no security verdict about other operations."
+    },
+    {
+      "id": "cfg-floating-image-docker-negative-3",
+      "language": "docker",
+      "source": "# FROM example.invalid/app:latest\nRUN echo 'FROM example.invalid/app:latest'",
+      "expected": [],
+      "forbidden": [
+        "CFG-FLOATING-IMAGE"
+      ],
+      "note": "Independent safe/context-negative regression; no security verdict about other operations."
+    },
+    {
+      "id": "cfg-floating-image-config-positive-1",
+      "language": "config",
+      "source": "services:\n  farm:\n    image: registry.example.invalid/farm:latest",
+      "expected": [
+        "CFG-FLOATING-IMAGE"
+      ],
+      "forbidden": [],
+      "note": "Independent positive regression; inert source text, never executed."
+    },
+    {
+      "id": "cfg-floating-image-config-positive-2",
+      "language": "config",
+      "source": "image: registry.example.invalid:5000/neo:latest\n",
+      "expected": [
+        "CFG-FLOATING-IMAGE"
+      ],
+      "forbidden": [],
+      "note": "Independent positive regression; inert source text, never executed."
+    },
+    {
+      "id": "cfg-floating-image-config-negative-1",
+      "language": "config",
+      "source": "image: registry.example.invalid/farm:1.0",
+      "expected": [],
+      "forbidden": [
+        "CFG-FLOATING-IMAGE"
+      ],
+      "note": "Independent safe/context-negative regression; no security verdict about other operations."
+    },
+    {
+      "id": "cfg-floating-image-config-negative-2",
+      "language": "config",
+      "source": "image: registry.example.invalid/neo:latest@sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "expected": [],
+      "forbidden": [
+        "CFG-FLOATING-IMAGE"
+      ],
+      "note": "Independent safe/context-negative regression; no security verdict about other operations."
+    },
+    {
+      "id": "cfg-floating-image-config-negative-3",
+      "language": "config",
+      "source": "# image: registry.example.invalid/farm:latest\nnote: 'image: registry.example.invalid/farm:latest'",
+      "expected": [],
+      "forbidden": [
+        "CFG-FLOATING-IMAGE"
+      ],
+      "note": "Independent safe/context-negative regression; no security verdict about other operations."
+    },
+    {
+      "id": "cfg-floating-image-docker-negative-instruction",
+      "language": "docker",
+      "source": "RUN echo FROM example.invalid/app:latest\nENV instruction=image: example.invalid/app:latest",
+      "expected": [],
+      "forbidden": ["CFG-FLOATING-IMAGE"],
+      "note": "Unquoted shell output and ENV text are not Docker base image instructions."
+    },
+    {
+      "id": "cfg-floating-image-config-negative-scalar",
+      "language": "config",
+      "source": "description: image: example.invalid/app:latest\ncommand: echo FROM example.invalid/app:latest",
+      "expected": [],
+      "forbidden": ["CFG-FLOATING-IMAGE"],
+      "note": "Non-image configuration keys are not bare YAML image declarations."
+    },
+    {
+      "id": "sql-rls-allow-all-sql-positive-1",
+      "language": "sql",
+      "source": "ALTER POLICY allow_updates ON records WITH CHECK (TRUE);",
+      "expected": [
+        "SQL-RLS-ALLOW-ALL"
+      ],
+      "forbidden": [],
+      "note": "Independent positive regression; inert source text, never executed."
+    },
+    {
+      "id": "sql-rls-allow-all-sql-positive-2",
+      "language": "sql",
+      "source": "CREATE POLICY readable ON messages FOR SELECT USING (\n true\n);",
+      "expected": [
+        "SQL-RLS-ALLOW-ALL"
+      ],
+      "forbidden": [],
+      "note": "Independent positive regression; inert source text, never executed."
+    },
+    {
+      "id": "sql-rls-allow-all-sql-negative-1",
+      "language": "sql",
+      "source": "CREATE POLICY owner_read ON records USING (owner_id = current_user);",
+      "expected": [],
+      "forbidden": [
+        "SQL-RLS-ALLOW-ALL"
+      ],
+      "note": "Independent safe/context-negative regression; no security verdict about other operations."
+    },
+    {
+      "id": "sql-rls-allow-all-sql-negative-2",
+      "language": "sql",
+      "source": "ALTER POLICY owner_write ON records WITH CHECK (owner_id = current_user);",
+      "expected": [],
+      "forbidden": [
+        "SQL-RLS-ALLOW-ALL"
+      ],
+      "note": "Independent safe/context-negative regression; no security verdict about other operations."
+    },
+    {
+      "id": "sql-rls-allow-all-sql-negative-3",
+      "language": "sql",
+      "source": "-- USING (true)\nSELECT 'WITH CHECK(true)';",
+      "expected": [],
+      "forbidden": [
+        "SQL-RLS-ALLOW-ALL"
+      ],
+      "note": "Independent safe/context-negative regression; no security verdict about other operations."
+    },
+    {
+      "id": "sql-rls-allow-all-sql-negative-4",
+      "language": "sql",
+      "source": "/* CREATE POLICY broad ON records USING(true); */",
+      "expected": [],
+      "forbidden": [
+        "SQL-RLS-ALLOW-ALL"
+      ],
+      "note": "Independent safe/context-negative regression; no security verdict about other operations."
+    },
+    {
+      "id": "tpl-autoescape-off-template-positive-1",
+      "language": "template",
+      "source": "{% autoescape off %}{{ profile }}{% endautoescape %}",
+      "expected": [
+        "TPL-AUTOESCAPE-OFF"
+      ],
+      "forbidden": [],
+      "note": "Independent positive regression; inert source text, never executed."
+    },
+    {
+      "id": "tpl-autoescape-off-template-positive-2",
+      "language": "template",
+      "source": "{% autoescape   false %}\n{{ text }}\n{% endautoescape %}",
+      "expected": [
+        "TPL-AUTOESCAPE-OFF"
+      ],
+      "forbidden": [],
+      "note": "Independent positive regression; inert source text, never executed."
+    },
+    {
+      "id": "tpl-autoescape-off-template-negative-1",
+      "language": "template",
+      "source": "{% autoescape true %}{{ message }}{% endautoescape %}",
+      "expected": [],
+      "forbidden": [
+        "TPL-AUTOESCAPE-OFF"
+      ],
+      "note": "Independent safe/context-negative regression; no security verdict about other operations."
+    },
+    {
+      "id": "tpl-autoescape-off-template-negative-2",
+      "language": "template",
+      "source": "{% autoescape on %}{{ message }}{% endautoescape %}",
+      "expected": [],
+      "forbidden": [
+        "TPL-AUTOESCAPE-OFF"
+      ],
+      "note": "Independent safe/context-negative regression; no security verdict about other operations."
+    },
+    {
+      "id": "tpl-autoescape-off-template-negative-3",
+      "language": "template",
+      "source": "{# {% autoescape false %} #}",
+      "expected": [],
+      "forbidden": [
+        "TPL-AUTOESCAPE-OFF"
+      ],
+      "note": "Independent safe/context-negative regression; no security verdict about other operations."
+    },
+    {
+      "id": "tpl-autoescape-off-template-negative-4",
+      "language": "template",
+      "source": "<!-- {% autoescape off %} -->",
+      "expected": [],
+      "forbidden": [
+        "TPL-AUTOESCAPE-OFF"
+      ],
+      "note": "Independent safe/context-negative regression; no security verdict about other operations."
+    }
+  ]
+}

@@ -1,0 +1,224 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:durkahelper:schema:snapshot:v1",
+  "title": "DurkaHelper defense snapshot v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "tool", "created_at", "profile", "root", "scope", "partial", "issues", "limits", "files", "adapters", "skipped", "summary"],
+  "properties": {
+    "schema": {"const": "durkahelper.snapshot.v1"},
+    "tool": {"$ref": "#/$defs/tool"},
+    "created_at": {"type": "string", "format": "date-time"},
+    "profile": {"$ref": "#/$defs/profileRef"},
+    "root": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "scope": {"$ref": "#/$defs/scope"},
+    "partial": {"type": "boolean"},
+    "issues": {
+      "type": "array", "maxItems": 100000,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["component", "path", "reason"],
+        "properties": {
+          "component": {"type": "string", "minLength": 1, "maxLength": 120},
+          "path": {"type": ["string", "null"], "maxLength": 4096},
+          "reason": {"type": "string", "minLength": 1, "maxLength": 120}
+        }
+      }
+    },
+    "limits": {"$ref": "#/$defs/limits"},
+    "files": {"type": "array", "maxItems": 100000, "items": {"$ref": "#/$defs/file"}},
+    "adapters": {
+      "type": "object", "additionalProperties": false,
+      "properties": {
+        "platform": {"oneOf": [{"$ref": "#/$defs/platform"}, {"type": "null"}]},
+        "processes": {"oneOf": [{"$ref": "#/$defs/processes"}, {"type": "null"}]},
+        "listeners": {"oneOf": [{"$ref": "#/$defs/listeners"}, {"type": "null"}]},
+        "services": {"oneOf": [{"$ref": "#/$defs/services"}, {"type": "null"}]},
+        "compose": {"oneOf": [{"$ref": "#/$defs/compose"}, {"type": "null"}]}
+      }
+    },
+    "skipped": {
+      "type": "object", "maxProperties": 128,
+      "propertyNames": {"minLength": 1, "maxLength": 120},
+      "additionalProperties": {"type": "integer", "minimum": 0}
+    },
+    "summary": {
+      "type": "object", "additionalProperties": false,
+      "required": ["files", "total_bytes"],
+      "properties": {
+        "files": {"type": "integer", "minimum": 0, "maximum": 100000},
+        "total_bytes": {"type": "integer", "minimum": 0, "maximum": 21474836480}
+      }
+    }
+  },
+  "$defs": {
+    "tool": {
+      "type": "object", "additionalProperties": false, "required": ["name", "version"],
+      "properties": {
+        "name": {"const": "DurkaHelper defense_ops"},
+        "version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:[-+][0-9A-Za-z.-]+)?$"}
+      }
+    },
+    "profileRef": {
+      "type": "object", "additionalProperties": false, "required": ["name", "sha256"],
+      "properties": {
+        "name": {"type": "string", "minLength": 1, "maxLength": 120},
+        "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+      }
+    },
+    "limits": {
+      "type": "object", "additionalProperties": false,
+      "required": ["max_files", "max_file_bytes", "max_total_bytes"],
+      "properties": {
+        "max_files": {"type": "integer", "minimum": 1, "maximum": 100000},
+        "max_file_bytes": {"type": "integer", "minimum": 1, "maximum": 1073741824},
+        "max_total_bytes": {"type": "integer", "minimum": 1, "maximum": 21474836480}
+      }
+    },
+    "portablePath": {
+      "$comment": "The runtime additionally enforces NFC, case-fold uniqueness, and reserved-device names.",
+      "type": "string", "minLength": 1, "maxLength": 1024,
+      "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))(?!.*(?:^|/)(?:[Cc][Oo][Nn]|[Pp][Rr][Nn]|[Aa][Uu][Xx]|[Nn][Uu][Ll]|[Cc][Oo][Mm][1-9]|[Ll][Pp][Tt][1-9])(?:[ .]*\\.[^/]*)?(?:/|$))(?!.*\\\\)(?!.*:)(?!.*[<>\"|?*])(?!.+(?:[. ])(?:/|$))[^/]+(?:/[^/]+)*$"
+    },
+    "file": {
+      "type": "object", "additionalProperties": false,
+      "required": ["path", "size", "mtime_ns", "mode", "sha256"],
+      "properties": {
+        "path": {"$ref": "#/$defs/portablePath"},
+        "size": {"type": "integer", "minimum": 0, "maximum": 1073741824},
+        "mtime_ns": {"type": "integer", "minimum": 0, "maximum": 253402300799999999999},
+        "mode": {"type": "integer", "minimum": 0, "maximum": 4095},
+        "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+      }
+    },
+    "scope": {
+      "type": "object", "additionalProperties": false,
+      "required": ["schema", "tool_compatibility", "adapter_semantics", "adapter_config", "files", "sha256"],
+      "properties": {
+        "schema": {"const": "durkahelper.snapshot-scope.v1"},
+        "tool_compatibility": {"const": "durkahelper-defense-ops-major-2"},
+        "adapter_semantics": {
+          "type": "object", "additionalProperties": false,
+          "properties": {
+            "platform": {"const": "platform-system-machine-release-python-v1"},
+            "processes": {"const": "process-name-uid-count-v1"},
+            "listeners": {"const": "listener-endpoint-no-pid-v1"},
+            "services": {"const": "service-state-no-pid-v1"},
+            "compose": {"const": "compose-explicit-project-config-hash-service-state-v1"}
+          }
+        },
+        "adapter_config": {
+          "type": "object", "additionalProperties": false,
+          "properties": {
+            "compose": {
+              "type": "object", "additionalProperties": false,
+              "required": ["config_files", "project_sha256", "services"],
+              "properties": {
+                "config_files": {"type": "array", "minItems": 1, "maxItems": 8, "uniqueItems": true, "items": {"$ref": "#/$defs/portablePath"}},
+                "project_sha256": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+                "services": {"type": "array", "minItems": 1, "maxItems": 128, "uniqueItems": true, "items": {"type": "string", "pattern": "^[a-z0-9][a-z0-9_.-]{0,63}$"}}
+              }
+            }
+          }
+        },
+        "files": {
+          "type": "object", "additionalProperties": false,
+          "required": ["content_semantics", "exclude", "include", "max_file_bytes", "max_files", "max_total_bytes", "path_semantics"],
+          "properties": {
+            "content_semantics": {"const": "sha256-size-mode-mtime-v1"},
+            "exclude": {"$ref": "#/$defs/globs"},
+            "include": {"$ref": "#/$defs/globs"},
+            "max_file_bytes": {"type": "integer", "minimum": 1, "maximum": 1073741824},
+            "max_files": {"type": "integer", "minimum": 1, "maximum": 100000},
+            "max_total_bytes": {"type": "integer", "minimum": 1, "maximum": 21474836480},
+            "path_semantics": {"const": "portable-nfc-casefold-v1"}
+          }
+        },
+        "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+      }
+    },
+    "globs": {
+      "type": "array", "maxItems": 128, "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1, "maxLength": 512}
+    },
+    "platform": {
+      "type": "object", "additionalProperties": false, "required": ["machine", "system"],
+      "properties": {
+        "machine": {"type": "string", "maxLength": 512},
+        "python": {"type": "string", "maxLength": 512},
+        "release": {"type": "string", "maxLength": 512},
+        "system": {"type": "string", "maxLength": 512}
+      }
+    },
+    "processes": {
+      "type": "array", "maxItems": 100000,
+      "items": {
+        "type": "object", "additionalProperties": false, "required": ["name", "pid", "ppid", "uid"],
+        "properties": {
+          "name": {"type": "string", "maxLength": 1024},
+          "pid": {"type": ["integer", "null"]}, "ppid": {"type": ["integer", "null"]},
+          "uid": {"type": ["integer", "null"]}
+        }
+      }
+    },
+    "listeners": {
+      "type": "array", "maxItems": 100000,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["address", "port", "protocol", "state"],
+        "properties": {
+          "address": {"type": "string", "minLength": 1, "maxLength": 256},
+          "name": {"type": ["string", "null"], "maxLength": 1024},
+          "pid": {"type": ["integer", "null"]},
+          "port": {"type": "integer", "minimum": 0, "maximum": 65535},
+          "protocol": {"type": "string", "minLength": 1, "maxLength": 32},
+          "state": {"type": "string", "minLength": 1, "maxLength": 64}
+        }
+      }
+    },
+    "services": {
+      "type": "array", "maxItems": 100000,
+      "items": {
+        "type": "object", "additionalProperties": false, "required": ["name"],
+        "properties": {
+          "active": {"type": "string", "maxLength": 256}, "load": {"type": "string", "maxLength": 256},
+          "name": {"type": "string", "minLength": 1, "maxLength": 1024},
+          "pid": {"type": ["integer", "null"]}, "state": {"type": "string", "maxLength": 256},
+          "status": {"type": "string", "maxLength": 256}, "sub": {"type": "string", "maxLength": 256}
+        }
+      }
+    },
+    "compose": {
+      "type": "object", "additionalProperties": false,
+      "required": ["config_files", "project_sha256", "services"],
+      "properties": {
+        "project_sha256": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "config_files": {
+          "type": "array", "minItems": 1, "maxItems": 8,
+          "items": {
+            "type": "object", "additionalProperties": false,
+            "required": ["path", "sha256", "size"],
+            "properties": {
+              "path": {"$ref": "#/$defs/portablePath"},
+              "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+              "size": {"type": "integer", "minimum": 0, "maximum": 16777216}
+            }
+          }
+        },
+        "services": {
+          "type": "array", "maxItems": 100000,
+          "items": {
+            "type": "object", "additionalProperties": false,
+            "required": ["count", "health", "service", "state"],
+            "properties": {
+              "count": {"type": "integer", "minimum": 0, "maximum": 100000},
+              "health": {"enum": ["healthy", "unhealthy", "starting", "none"]},
+              "service": {"type": "string", "pattern": "^[a-z0-9][a-z0-9_.-]{0,63}$"},
+              "state": {"type": "string", "minLength": 1, "maxLength": 64}
+            }
+          }
+        }
+      }
+    }
+  }
+}

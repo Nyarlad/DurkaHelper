@@ -1,0 +1,104 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "team_lan",
+    "approved_bind_addresses",
+    "approved_publications",
+    "approved_images",
+    "require_healthcheck",
+    "require_resource_limits",
+    "require_nonroot",
+    "require_restart",
+    "allow_amd64_emulation",
+    "approved_live_capture"
+  ],
+  "properties": {
+    "schema": {
+      "const": "durkahelper.deployment-policy.v1"
+    },
+    "team_lan": {
+      "type": "boolean"
+    },
+    "approved_bind_addresses": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "maxLength": 45
+      },
+      "maxItems": 128
+    },
+    "approved_publications": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "host_port",
+          "container_port",
+          "protocol",
+          "service"
+        ],
+        "properties": {
+          "host_port": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 65535
+          },
+          "container_port": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 65535
+          },
+          "protocol": {
+            "enum": [
+              "tcp",
+              "udp"
+            ]
+          },
+          "service": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_.-]{0,63}$"
+          }
+        }
+      },
+      "maxItems": 128
+    },
+    "approved_images": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "maxLength": 256,
+        "pattern": "(?:@|^)sha256:[0-9a-f]{64}$"
+      },
+      "maxItems": 128
+    },
+    "require_healthcheck": {
+      "type": "boolean"
+    },
+    "require_resource_limits": {
+      "type": "boolean"
+    },
+    "require_nonroot": {
+      "type": "boolean"
+    },
+    "require_restart": {
+      "type": "boolean"
+    },
+    "allow_amd64_emulation": {
+      "type": "boolean"
+    },
+    "approved_live_capture": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9][a-z0-9_.-]{0,63}$"
+      },
+      "maxItems": 128
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:durkahelper:schema:deployment-policy:v1",
+  "title": "Explicit deployment audit policy"
+}

@@ -1,0 +1,260 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:durkahelper:toolchain-manifest:v2",
+  "title": "DurkaHelper complete target or partial image-export inventory",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "release_commit",
+    "scope",
+    "targets",
+    "required_ids",
+    "artifacts"
+  ],
+  "properties": {
+    "schema": {"const": "durkahelper.toolchain-manifest.v2"},
+    "release_commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "scope": {"enum": ["complete-target", "image-export"]},
+    "targets": {
+      "type": "array",
+      "maxItems": 16,
+      "items": {"$ref": "#/$defs/target"}
+    },
+    "required_ids": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 256,
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/id"}
+    },
+    "artifacts": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 256,
+      "items": {"$ref": "#/$defs/artifact"}
+    }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9_.-]{0,63}$"
+    },
+    "imageId": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "containerPlatform": {
+      "enum": ["linux/amd64", "linux/arm64"]
+    },
+    "role": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "component", "platform", "image_id"],
+      "properties": {
+        "id": {
+          "enum": [
+            "postgres",
+            "redis",
+            "neo-redis",
+            "farm",
+            "celery",
+            "front",
+            "neo-server",
+            "neo-worker",
+            "packmate-db",
+            "packmate"
+          ]
+        },
+        "component": {"enum": ["s4dfarm", "neo", "packmate"]},
+        "platform": {"$ref": "#/$defs/containerPlatform"},
+        "image_id": {"$ref": "#/$defs/imageId"}
+      }
+    },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "platform",
+        "container_platforms",
+        "deployment_contract_sha256",
+        "runtime_roles",
+        "artifact_ids"
+      ],
+      "properties": {
+        "id": {"$ref": "#/$defs/id"},
+        "platform": {
+          "enum": ["linux/amd64", "linux/arm64", "darwin/arm64", "windows/amd64"]
+        },
+        "container_platforms": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 2,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/containerPlatform"}
+        },
+        "deployment_contract_sha256": {
+          "const": "a2327cb0dd091d387d33b283337c048778b6b7aa9bef5a344d19aa48c0d9322b"
+        },
+        "runtime_roles": {
+          "type": "array",
+          "minItems": 10,
+          "maxItems": 10,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/role"},
+          "allOf": [
+            {"contains": {"properties": {"id": {"const": "postgres"}, "component": {"const": "s4dfarm"}}, "required": ["id", "component"]}, "minContains": 1, "maxContains": 1},
+            {"contains": {"properties": {"id": {"const": "redis"}, "component": {"const": "s4dfarm"}}, "required": ["id", "component"]}, "minContains": 1, "maxContains": 1},
+            {"contains": {"properties": {"id": {"const": "neo-redis"}, "component": {"const": "neo"}}, "required": ["id", "component"]}, "minContains": 1, "maxContains": 1},
+            {"contains": {"properties": {"id": {"const": "farm"}, "component": {"const": "s4dfarm"}}, "required": ["id", "component"]}, "minContains": 1, "maxContains": 1},
+            {"contains": {"properties": {"id": {"const": "celery"}, "component": {"const": "s4dfarm"}}, "required": ["id", "component"]}, "minContains": 1, "maxContains": 1},
+            {"contains": {"properties": {"id": {"const": "front"}, "component": {"const": "s4dfarm"}}, "required": ["id", "component"]}, "minContains": 1, "maxContains": 1},
+            {"contains": {"properties": {"id": {"const": "neo-server"}, "component": {"const": "neo"}}, "required": ["id", "component"]}, "minContains": 1, "maxContains": 1},
+            {"contains": {"properties": {"id": {"const": "neo-worker"}, "component": {"const": "neo"}}, "required": ["id", "component"]}, "minContains": 1, "maxContains": 1},
+            {"contains": {"properties": {"id": {"const": "packmate-db"}, "component": {"const": "packmate"}}, "required": ["id", "component"]}, "minContains": 1, "maxContains": 1},
+            {"contains": {"properties": {"id": {"const": "packmate"}, "component": {"const": "packmate"}, "platform": {"const": "linux/amd64"}}, "required": ["id", "component", "platform"]}, "minContains": 1, "maxContains": 1}
+          ]
+        },
+        "artifact_ids": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 256,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/id"}
+        }
+      }
+    },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "path",
+        "kind",
+        "component",
+        "architecture",
+        "version",
+        "compatible_with",
+        "runtime_roles",
+        "sha256",
+        "size",
+        "license",
+        "redistribution",
+        "image_ids"
+      ],
+      "properties": {
+        "id": {"$ref": "#/$defs/id"},
+        "path": {"type": "string", "minLength": 1, "maxLength": 1024},
+        "kind": {
+          "enum": ["core", "image", "source", "client", "license", "installer", "runtime"]
+        },
+        "component": {"$ref": "#/$defs/id"},
+        "architecture": {
+          "enum": ["all", "linux/amd64", "linux/arm64", "darwin/arm64", "windows/amd64"]
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._+:/@-]{0,127}$"
+        },
+        "compatible_with": {
+          "type": "array",
+          "maxItems": 64,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/id"}
+        },
+        "runtime_roles": {
+          "type": "array",
+          "maxItems": 10,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "postgres",
+              "redis",
+              "neo-redis",
+              "farm",
+              "celery",
+              "front",
+              "neo-server",
+              "neo-worker",
+              "packmate-db",
+              "packmate"
+            ]
+          }
+        },
+        "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "size": {"type": "integer", "minimum": 1, "maximum": 34359738368},
+        "license": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9.+() -]{0,127}$"
+        },
+        "redistribution": {"enum": ["local-only", "reviewed"]},
+        "image_ids": {
+          "type": "array",
+          "maxItems": 64,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/imageId"}
+        }
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"kind": {"const": "image"}}, "required": ["kind"]},
+          "then": {
+            "properties": {
+              "architecture": {"$ref": "#/$defs/containerPlatform"},
+              "image_ids": {"minItems": 1},
+              "runtime_roles": {"minItems": 0}
+            }
+          },
+          "else": {
+            "properties": {
+              "image_ids": {"maxItems": 0},
+              "runtime_roles": {"maxItems": 0}
+            }
+          }
+        },
+        {
+          "if": {"properties": {"kind": {"const": "client"}}, "required": ["kind"]},
+          "then": {"properties": {"compatible_with": {"minItems": 2, "maxItems": 2}}},
+          "else": {
+            "if": {"properties": {"kind": {"const": "image"}}, "required": ["kind"]},
+            "else": {"properties": {"compatible_with": {"maxItems": 0}}}
+          }
+        },
+        {
+          "if": {"properties": {"kind": {"const": "source"}}, "required": ["kind"]},
+          "then": {"properties": {"version": {"pattern": "^[0-9a-f]{40}$"}}}
+        }
+      ]
+    }
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"scope": {"const": "complete-target"}}, "required": ["scope"]},
+      "then": {"properties": {"targets": {"minItems": 1}}}
+    },
+    {
+      "if": {"properties": {"scope": {"const": "image-export"}}, "required": ["scope"]},
+      "then": {
+        "properties": {
+          "targets": {"maxItems": 0},
+          "artifacts": {
+            "items": {
+              "allOf": [
+                {"$ref": "#/$defs/artifact"},
+                {
+                  "properties": {
+                    "kind": {"const": "image"},
+                    "compatible_with": {"maxItems": 0},
+                    "runtime_roles": {"maxItems": 0}
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  ],
+  "$comment": "The parser additionally enforces portable/private paths, exact inventory identity, byte budgets, fixed component/kind coverage, global and per-target compatibility/provenance edges, release/source pins, image-role identity coverage, target-derived role platforms, shared Redis image identity, and the fixed maintained-deployment contract. complete-target verification requires a trusted detached manifest SHA-256. image-export remains partial."
+}

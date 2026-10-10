@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:durkahelper:schema:comparison:v1",
+  "title": "DurkaHelper snapshot comparison v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "tool", "compared_at", "baseline", "current", "profile", "scope", "comparable", "partial", "reasons", "drift", "summary", "exit_code"],
+  "properties": {
+    "schema": {"const": "durkahelper.comparison.v1"},
+    "tool": {"$ref": "#/$defs/tool"},
+    "compared_at": {"type": "string", "format": "date-time"},
+    "baseline": {"$ref": "#/$defs/input"},
+    "current": {"$ref": "#/$defs/input"},
+    "profile": {"$ref": "#/$defs/profileRef"},
+    "scope": {
+      "type": "object", "additionalProperties": false,
+      "required": ["baseline_sha256", "current_sha256"],
+      "properties": {
+        "baseline_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "current_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+      }
+    },
+    "comparable": {"type": "boolean"},
+    "partial": {"type": "boolean"},
+    "reasons": {"type": "array", "maxItems": 16, "uniqueItems": true, "items": {"type": "string", "minLength": 1, "maxLength": 120}},
+    "drift": {
+      "type": "object", "additionalProperties": false,
+      "required": ["adapters_changed", "files_added", "files_content_changed", "files_metadata_changed", "files_removed"],
+      "properties": {
+        "adapters_changed": {"type": "array", "uniqueItems": true, "items": {"enum": ["platform", "processes", "listeners", "services"]}},
+        "files_added": {"$ref": "#/$defs/paths"},
+        "files_content_changed": {"$ref": "#/$defs/paths"},
+        "files_metadata_changed": {"$ref": "#/$defs/paths"},
+        "files_removed": {"$ref": "#/$defs/paths"}
+      }
+    },
+    "summary": {
+      "type": "object", "additionalProperties": false,
+      "required": ["adapter_changes", "drift_count", "files_added", "files_content_changed", "files_metadata_changed", "files_removed"],
+      "properties": {
+        "adapter_changes": {"type": "integer", "minimum": 0},
+        "drift_count": {"type": "integer", "minimum": 0},
+        "files_added": {"type": "integer", "minimum": 0},
+        "files_content_changed": {"type": "integer", "minimum": 0},
+        "files_metadata_changed": {"type": "integer", "minimum": 0},
+        "files_removed": {"type": "integer", "minimum": 0}
+      }
+    },
+    "exit_code": {"enum": [0, 1, 2]}
+  },
+  "$defs": {
+    "tool": {
+      "type": "object", "additionalProperties": false, "required": ["name", "version"],
+      "properties": {
+        "name": {"const": "DurkaHelper defense_ops"},
+        "version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(?:[-+][0-9A-Za-z.-]+)?$"}
+      }
+    },
+    "profileRef": {
+      "type": "object", "additionalProperties": false, "required": ["name", "sha256"],
+      "properties": {
+        "name": {"type": "string", "minLength": 1, "maxLength": 120},
+        "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+      }
+    },
+    "input": {
+      "type": "object", "additionalProperties": false, "required": ["created_at", "sha256"],
+      "properties": {
+        "created_at": {"type": "string", "format": "date-time"},
+        "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+      }
+    },
+    "paths": {
+      "type": "array", "maxItems": 100000, "uniqueItems": true,
+      "items": {
+        "type": "string", "minLength": 1, "maxLength": 1024,
+        "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))(?!.*(?:^|/)(?:[Cc][Oo][Nn]|[Pp][Rr][Nn]|[Aa][Uu][Xx]|[Nn][Uu][Ll]|[Cc][Oo][Mm][1-9]|[Ll][Pp][Tt][1-9])(?:[ .]*\\.[^/]*)?(?:/|$))(?!.*\\\\)(?!.*:)(?!.*[<>\"|?*])(?!.+(?:[. ])(?:/|$))[^/]+(?:/[^/]+)*$"
+      }
+    }
+  }
+}

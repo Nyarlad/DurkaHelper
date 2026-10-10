@@ -1,0 +1,5 @@
+{
+  "schema": "durkahelper.scanner-context.v1",
+  "infrastructure": ["docker-desktop", "compose", "vulnbox", "team-lan", "s4dfarm", "neo", "packmate"],
+  "role": "both"
+}

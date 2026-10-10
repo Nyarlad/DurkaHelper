@@ -1,0 +1,926 @@
+{
+  "schema_version": 1,
+  "description": "Locally authored API/config variants. Never execute these inputs; no network or target runtime required.",
+  "cases": [
+    {
+      "id": "py-shell-unpacked-literal",
+      "language": "python",
+      "source": "import subprocess\nsubprocess.run(command, **{'shell': True})",
+      "expected": [
+        "PY-SHELL"
+      ],
+      "forbidden": [],
+      "note": "Синтаксический сигнал должен сохраняться в этой форме API."
+    },
+    {
+      "id": "py-shell-unpacked-false",
+      "language": "python",
+      "source": "import subprocess\nsubprocess.run(command, **{'shell': False})",
+      "expected": [],
+      "forbidden": [
+        "PY-SHELL"
+      ],
+      "note": "Эта форма не должна давать указанный сигнал; это не доказательство безопасности всего фрагмента."
+    },
+    {
+      "id": "py-async-shell-argv",
+      "language": "python",
+      "source": "import asyncio\nawait asyncio.create_subprocess_exec('/bin/sh', '-c', command)",
+      "expected": [
+        "PY-SHELL"
+      ],
+      "forbidden": [],
+      "note": "Синтаксический сигнал должен сохраняться в этой форме API."
+    },
+    {
+      "id": "py-async-direct-argv",
+      "language": "python",
+      "source": "import asyncio\nawait asyncio.create_subprocess_exec('/usr/bin/file', '--', name)",
+      "expected": [],
+      "forbidden": [
+        "PY-SHELL"
+      ],
+      "note": "Эта форма не должна давать указанный сигнал; это не доказательство безопасности всего фрагмента."
+    },
+    {
+      "id": "py-tls-unpacked-literal",
+      "language": "python",
+      "source": "import requests\nrequests.get('https://example.invalid', **{'verify': False})",
+      "expected": [
+        "PY-TLS"
+      ],
+      "forbidden": [],
+      "note": "Синтаксический сигнал должен сохраняться в этой форме API."
+    },
+    {
+      "id": "py-tls-later-override-safe",
+      "language": "python",
+      "source": "import requests\nrequests.get('https://example.invalid', **{'verify': False, **{'verify': True}})",
+      "expected": [],
+      "forbidden": [
+        "PY-TLS"
+      ],
+      "note": "Эта форма не должна давать указанный сигнал; это не доказательство безопасности всего фрагмента."
+    },
+    {
+      "id": "py-tls-later-override-unsafe",
+      "language": "python",
+      "source": "import requests\nrequests.get('https://example.invalid', **{'verify': True, **{'verify': False}})",
+      "expected": [
+        "PY-TLS"
+      ],
+      "forbidden": [],
+      "note": "Синтаксический сигнал должен сохраняться в этой форме API."
+    },
+    {
+      "id": "py-jwt-unpacked-signature",
+      "language": "python",
+      "source": "import jwt\njwt.decode(token, **{'options': {'verify_signature': False}})",
+      "expected": [
+        "PY-JWT"
+      ],
+      "forbidden": [],
+      "note": "Синтаксический сигнал должен сохраняться в этой форме API."
+    },
+    {
+      "id": "py-jwt-options-override-safe",
+      "language": "python",
+      "source": "import jwt\njwt.decode(token, options={'verify_signature': False, **{'verify_signature': True}})",
+      "expected": [],
+      "forbidden": [
+        "PY-JWT"
+      ],
+      "note": "Эта форма не должна давать указанный сигнал; это не доказательство безопасности всего фрагмента."
+    },
+    {
+      "id": "py-jwt-options-override-unsafe",
+      "language": "python",
+      "source": "import jwt\njwt.decode(token, options={**{'verify_signature': True}, 'verify_signature': False})",
+      "expected": [
+        "PY-JWT"
+      ],
+      "forbidden": [],
+      "note": "Синтаксический сигнал должен сохраняться в этой форме API."
+    },
+    {
+      "id": "py-yaml-loader-unpacked-safe",
+      "language": "python",
+      "source": "import yaml\nyaml.load(text, **{'Loader': yaml.SafeLoader})",
+      "expected": [],
+      "forbidden": [
+        "PY-YAML"
+      ],
+      "note": "Эта форма не должна давать указанный сигнал; это не доказательство безопасности всего фрагмента."
+    },
+    {
+      "id": "py-yaml-loader-unpacked-unsafe",
+      "language": "python",
+      "source": "import yaml\nyaml.load(text, **{'Loader': yaml.UnsafeLoader})",
+      "expected": [
+        "PY-YAML"
+      ],
+      "forbidden": [],
+      "note": "Синтаксический сигнал должен сохраняться в этой форме API."
+    },
+    {
+      "id": "py-sql-keyword-query",
+      "language": "python",
+      "source": "cursor.execute(query=f'SELECT {column}')",
+      "expected": [
+        "PY-SQL"
+      ],
+      "forbidden": [],
+      "note": "Синтаксический сигнал должен сохраняться в этой форме API."
+    },
+    {
+      "id": "py-sql-keyword-query-safe",
+      "language": "python",
+      "source": "cursor.execute(query='SELECT * FROM notes WHERE id=%s', params=(uid,))",
+      "expected": [],
+      "forbidden": [
+        "PY-SQL"
+      ],
+      "note": "Эта форма не должна давать указанный сигнал; это не доказательство безопасности всего фрагмента."
+    },
+    {
+      "id": "py-sql-keyword-text",
+      "language": "python",
+      "source": "from sqlalchemy import text\nquery = text(text=f'SELECT {column}')",
+      "expected": [
+        "PY-SQL"
+      ],
+      "forbidden": [],
+      "note": "Синтаксический сигнал должен сохраняться в этой форме API."
+    },
+    {
+      "id": "py-session-url",
+      "language": "python",
+      "source": "import requests as r\ns = r.Session()\ns.get(target)",
+      "expected": [
+        "PY-URL"
+      ],
+      "forbidden": [],
+      "note": "Синтаксический сигнал должен сохраняться в этой форме API."
+    },
+    {
+      "id": "py-session-url-constant",
+      "language": "python",
+      "source": "import requests\ns = requests.Session()\ns.get('https://example.invalid')",
+      "expected": [],
+      "forbidden": [
+        "PY-URL"
+      ],
+      "note": "Эта форма не должна давать указанный сигнал; это не доказательство безопасности всего фрагмента."
+    },
+    {
+      "id": "py-client-method-first",
+      "language": "python",
+      "source": "import httpx\nclient = httpx.Client()\nclient.request('POST', target)",
+      "expected": [
+        "PY-URL"
+      ],
+      "forbidden": [],
+      "note": "Синтаксический сигнал должен сохраняться в этой форме API."
+    },
+    {
+      "id": "py-async-client-keyword-url",
+      "language": "python",
+      "source": "from httpx import AsyncClient as Client\nclient = Client()\nawait client.get(url=target)",
+      "expected": [
+        "PY-URL"
+      ],
+      "forbidden": [],
+      "note": "Синтаксический сигнал должен сохраняться в этой форме API."
+    },
+    {
+      "id": "py-session-rebound",
+      "language": "python",
+      "source": "import requests\ns = requests.Session()\ns = local_store\ns.get(key)",
+      "expected": [],
+      "forbidden": [
+        "PY-URL"
+      ],
+      "note": "Эта форма не должна давать указанный сигнал; это не доказательство безопасности всего фрагмента."
+    },
+    {
+      "id": "py-jsonpickle-alias",
+      "language": "python",
+      "source": "import jsonpickle as jp\njp.decode(body)",
+      "expected": [
+        "PY-DESERIALIZE"
+      ],
+      "forbidden": [],
+      "note": "Синтаксический сигнал должен сохраняться в этой форме API."
+    },
+    {
+      "id": "py-joblib-alias",
+      "language": "python",
+      "source": "from joblib import load as read\nread(upload_path)",
+      "expected": [
+        "PY-DESERIALIZE"
+      ],
+      "forbidden": [],
+      "note": "Синтаксический сигнал должен сохраняться в этой форме API."
+    },
+    {
+      "id": "py-pandas-pickle",
+      "language": "python",
+      "source": "import pandas as pd\npd.read_pickle(upload_path)",
+      "expected": [
+        "PY-DESERIALIZE"
+      ],
+      "forbidden": [],
+      "note": "Синтаксический сигнал должен сохраняться в этой форме API."
+    },
+    {
+      "id": "py-unpickler-instance",
+      "language": "python",
+      "source": "from pickle import Unpickler as Reader\nreader = Reader(stream)\nreader.load()",
+      "expected": [
+        "PY-DESERIALIZE"
+      ],
+      "forbidden": [],
+      "note": "Синтаксический сигнал должен сохраняться в этой форме API."
+    },
+    {
+      "id": "py-unpickler-chained",
+      "language": "python",
+      "source": "import pickle\nvalue = pickle.Unpickler(stream).load()",
+      "expected": [
+        "PY-DESERIALIZE"
+      ],
+      "forbidden": [],
+      "note": "Синтаксический сигнал должен сохраняться в этой форме API."
+    },
+    {
+      "id": "py-json-data-parser",
+      "language": "python",
+      "source": "import json\nvalue = json.loads(body)",
+      "expected": [],
+      "forbidden": [
+        "PY-DESERIALIZE"
+      ],
+      "note": "Эта форма не должна давать указанный сигнал; это не доказательство безопасности всего фрагмента."
+    },
+    {
+      "id": "js-shell-string-option",
+      "language": "javascript",
+      "source": "spawn(command, {shell: '/bin/bash'});",
+      "expected": [
+        "JS-SHELL"
+      ],
+      "forbidden": [],
+      "note": "Синтаксический сигнал должен сохраняться в этой форме API."
+    },
+    {
+      "id": "js-shell-string-option-empty",
+      "language": "javascript",
+      "source": "spawn(command, {shell: ''});",
+      "expected": [],
+      "forbidden": [
+        "JS-SHELL"
+      ],
+      "note": "Эта форма не должна давать указанный сигнал; это не доказательство безопасности всего фрагмента."
+    },
+    {
+      "id": "js-shell-json-property",
+      "language": "javascript",
+      "source": "spawn(command, {\"shell\": true});",
+      "expected": [
+        "JS-SHELL"
+      ],
+      "forbidden": [],
+      "note": "Синтаксический сигнал должен сохраняться в этой форме API."
+    },
+    {
+      "id": "js-regexp-exec",
+      "language": "javascript",
+      "source": "const m = /[a-z]+/.exec(text);",
+      "expected": [],
+      "forbidden": [
+        "JS-SHELL"
+      ],
+      "note": "Эта форма не должна давать указанный сигнал; это не доказательство безопасности всего фрагмента."
+    },
+    {
+      "id": "js-regexp-object-exec",
+      "language": "javascript",
+      "source": "const regex = new RegExp('^[a-z]+$'); regex.exec(text);",
+      "expected": [],
+      "forbidden": [
+        "JS-SHELL"
+      ],
+      "note": "Эта форма не должна давать указанный сигнал; это не доказательство безопасности всего фрагмента."
+    },
+    {
+      "id": "js-shell-esm-alias",
+      "language": "javascript",
+      "source": "import {exec as run} from 'node:child_process';\nrun(command);",
+      "expected": [
+        "JS-SHELL"
+      ],
+      "forbidden": [],
+      "note": "Синтаксический сигнал должен сохраняться в этой форме API."
+    },
+    {
+      "id": "js-shell-cjs-alias",
+      "language": "javascript",
+      "source": "const {exec: run} = require('child_process');\nrun(command);",
+      "expected": [
+        "JS-SHELL"
+      ],
+      "forbidden": [],
+      "note": "Синтаксический сигнал должен сохраняться в этой форме API."
+    },
+    {
+      "id": "js-shell-namespace-alias",
+      "language": "javascript",
+      "source": "import * as processes from 'node:child_process';\nprocesses.exec(command);",
+      "expected": [
+        "JS-SHELL"
+      ],
+      "forbidden": [],
+      "note": "Синтаксический сигнал должен сохраняться в этой форме API."
+    },
+    {
+      "id": "js-shell-default-alias",
+      "language": "javascript",
+      "source": "const processes = require('node:child_process');\nprocesses.execSync(command);",
+      "expected": [
+        "JS-SHELL"
+      ],
+      "forbidden": [],
+      "note": "Синтаксический сигнал должен сохраняться в этой форме API."
+    },
+    {
+      "id": "js-shell-computed-member",
+      "language": "javascript",
+      "source": "const processes = require('child_process');\nprocesses['exec'](command);",
+      "expected": [
+        "JS-SHELL"
+      ],
+      "forbidden": [],
+      "note": "Синтаксический сигнал должен сохраняться в этой форме API."
+    },
+    {
+      "id": "js-shell-execfile-direct",
+      "language": "javascript",
+      "source": "import {execFile as run} from 'node:child_process';\nrun('/usr/bin/file', ['--', filename]);",
+      "expected": [],
+      "forbidden": [
+        "JS-SHELL"
+      ],
+      "note": "Эта форма не должна давать указанный сигнал; это не доказательство безопасности всего фрагмента."
+    },
+    {
+      "id": "js-shell-unrelated-module",
+      "language": "javascript",
+      "source": "import {exec as run} from './regexp-helper.js';\nrun(text);",
+      "expected": [],
+      "forbidden": [
+        "JS-SHELL"
+      ],
+      "note": "Эта форма не должна давать указанный сигнал; это не доказательство безопасности всего фрагмента."
+    },
+    {
+      "id": "js-jwt-esm-alias",
+      "language": "javascript",
+      "source": "import {decode as parseToken} from 'jsonwebtoken';\nconst claims = parseToken(raw);",
+      "expected": [
+        "JS-JWT-DECODE"
+      ],
+      "forbidden": [],
+      "note": "Синтаксический сигнал должен сохраняться в этой форме API."
+    },
+    {
+      "id": "js-jwt-cjs-alias",
+      "language": "javascript",
+      "source": "const {decode: parseToken} = require('jsonwebtoken');\nparseToken(raw);",
+      "expected": [
+        "JS-JWT-DECODE"
+      ],
+      "forbidden": [],
+      "note": "Синтаксический сигнал должен сохраняться в этой форме API."
+    },
+    {
+      "id": "js-jwt-namespace-alias",
+      "language": "javascript",
+      "source": "import tokens from 'jsonwebtoken';\ntokens.decode(raw);",
+      "expected": [
+        "JS-JWT-DECODE"
+      ],
+      "forbidden": [],
+      "note": "Синтаксический сигнал должен сохраняться в этой форме API."
+    },
+    {
+      "id": "js-jose-named-alias",
+      "language": "javascript",
+      "source": "import {decodeJwt as peek} from 'jose';\npeek(raw);",
+      "expected": [
+        "JS-JWT-DECODE"
+      ],
+      "forbidden": [],
+      "note": "Синтаксический сигнал должен сохраняться в этой форме API."
+    },
+    {
+      "id": "js-jwt-verification-alias",
+      "language": "javascript",
+      "source": "import {verify as verifyToken} from 'jsonwebtoken';\nverifyToken(raw, trustedKey);",
+      "expected": [],
+      "forbidden": [
+        "JS-JWT-DECODE"
+      ],
+      "note": "Эта форма не должна давать указанный сигнал; это не доказательство безопасности всего фрагмента."
+    },
+    {
+      "id": "js-tls-json-property",
+      "language": "javascript",
+      "source": "const options = {\"rejectUnauthorized\": false};",
+      "expected": [
+        "JS-TLS"
+      ],
+      "forbidden": [],
+      "note": "Синтаксический сигнал должен сохраняться в этой форме API."
+    },
+    {
+      "id": "js-tls-assignment",
+      "language": "javascript",
+      "source": "agent.rejectUnauthorized = false;",
+      "expected": [
+        "JS-TLS"
+      ],
+      "forbidden": [],
+      "note": "Синтаксический сигнал должен сохраняться в этой форме API."
+    },
+    {
+      "id": "js-tls-bracket-env",
+      "language": "javascript",
+      "source": "process.env[\"NODE_TLS_REJECT_UNAUTHORIZED\"] = \"0\";",
+      "expected": [
+        "JS-TLS"
+      ],
+      "forbidden": [],
+      "note": "Синтаксический сигнал должен сохраняться в этой форме API."
+    },
+    {
+      "id": "js-tls-json-safe",
+      "language": "javascript",
+      "source": "const options = {\"rejectUnauthorized\": true};",
+      "expected": [],
+      "forbidden": [
+        "JS-TLS"
+      ],
+      "note": "Эта форма не должна давать указанный сигнал; это не доказательство безопасности всего фрагмента."
+    },
+    {
+      "id": "js-sql-pg-config",
+      "language": "javascript",
+      "source": "client.query({text: `SELECT * FROM notes WHERE name=${name}`, values: []});",
+      "expected": [
+        "JS-SQL"
+      ],
+      "forbidden": [],
+      "note": "Синтаксический сигнал должен сохраняться в этой форме API."
+    },
+    {
+      "id": "js-sql-pg-config-safe",
+      "language": "javascript",
+      "source": "client.query({text: \"SELECT * FROM notes WHERE name=$1\", values: [name]});",
+      "expected": [],
+      "forbidden": [
+        "JS-SQL"
+      ],
+      "note": "Эта форма не должна давать указанный сигнал; это не доказательство безопасности всего фрагмента."
+    },
+    {
+      "id": "php-exec",
+      "language": "php",
+      "source": "exec($command, $output, $status);",
+      "expected": [
+        "PHP-SHELL"
+      ],
+      "forbidden": [],
+      "note": "Синтаксический сигнал должен сохраняться в этой форме API."
+    },
+    {
+      "id": "php-proc-open-string",
+      "language": "php",
+      "source": "proc_open($command, $descriptors, $pipes);",
+      "expected": [
+        "PHP-SHELL"
+      ],
+      "forbidden": [],
+      "note": "Синтаксический сигнал должен сохраняться в этой форме API."
+    },
+    {
+      "id": "php-proc-open-array-safe",
+      "language": "php",
+      "source": "proc_open([\"/usr/bin/file\", \"--\", $checkedName], $descriptors, $pipes);",
+      "expected": [],
+      "forbidden": [
+        "PHP-SHELL"
+      ],
+      "note": "Эта форма не должна давать указанный сигнал; это не доказательство безопасности всего фрагмента."
+    },
+    {
+      "id": "php-sql-interpolation",
+      "language": "php",
+      "source": "$db->query(\"SELECT * FROM notes WHERE name='$name'\");",
+      "expected": [
+        "PHP-SQL"
+      ],
+      "forbidden": [],
+      "note": "Синтаксический сигнал должен сохраняться в этой форме API."
+    },
+    {
+      "id": "php-sql-unsafe-prepare",
+      "language": "php",
+      "source": "$db->prepare(\"SELECT * FROM notes WHERE name=\" . $name);",
+      "expected": [
+        "PHP-SQL"
+      ],
+      "forbidden": [],
+      "note": "Синтаксический сигнал должен сохраняться в этой форме API."
+    },
+    {
+      "id": "php-sql-procedural",
+      "language": "php",
+      "source": "mysqli_query($conn, \"SELECT * FROM notes WHERE name=\" . $name);",
+      "expected": [
+        "PHP-SQL"
+      ],
+      "forbidden": [],
+      "note": "Синтаксический сигнал должен сохраняться в этой форме API."
+    },
+    {
+      "id": "php-sql-pg-procedural",
+      "language": "php",
+      "source": "pg_query($conn, \"SELECT * FROM notes WHERE name=\" . $name);",
+      "expected": [
+        "PHP-SQL"
+      ],
+      "forbidden": [],
+      "note": "Синтаксический сигнал должен сохраняться в этой форме API."
+    },
+    {
+      "id": "php-sql-placeholder-safe",
+      "language": "php",
+      "source": "$db->prepare(\"SELECT * FROM notes WHERE name = ?\");",
+      "expected": [],
+      "forbidden": [
+        "PHP-SQL"
+      ],
+      "note": "Эта форма не должна давать указанный сигнал; это не доказательство безопасности всего фрагмента."
+    },
+    {
+      "id": "go-shell-context-expression",
+      "language": "go",
+      "source": "exec.CommandContext(r.Context(), \"/bin/sh\", \"-c\", input)",
+      "expected": [
+        "GO-SHELL"
+      ],
+      "forbidden": [],
+      "note": "Синтаксический сигнал должен сохраняться в этой форме API."
+    },
+    {
+      "id": "go-shell-package-alias",
+      "language": "go",
+      "source": "import processes \"os/exec\"\nprocesses.Command(\"sh\", \"-c\", input)",
+      "expected": [
+        "GO-SHELL"
+      ],
+      "forbidden": [],
+      "note": "Синтаксический сигнал должен сохраняться в этой форме API."
+    },
+    {
+      "id": "go-shell-safe-argv",
+      "language": "go",
+      "source": "exec.CommandContext(r.Context(), \"/usr/bin/file\", \"--\", input)",
+      "expected": [],
+      "forbidden": [
+        "GO-SHELL"
+      ],
+      "note": "Эта форма не должна давать указанный сигнал; это не доказательство безопасности всего фрагмента."
+    },
+    {
+      "id": "go-sql-context-expression",
+      "language": "go",
+      "source": "db.QueryContext(r.Context(), \"SELECT * FROM notes WHERE name=\" + name)",
+      "expected": [
+        "GO-SQL"
+      ],
+      "forbidden": [],
+      "note": "Синтаксический сигнал должен сохраняться в этой форме API."
+    },
+    {
+      "id": "go-sql-context-placeholder",
+      "language": "go",
+      "source": "db.QueryContext(r.Context(), \"SELECT * FROM notes WHERE name=$1\", name)",
+      "expected": [],
+      "forbidden": [
+        "GO-SQL"
+      ],
+      "note": "Эта форма не должна давать указанный сигнал; это не доказательство безопасности всего фрагмента."
+    },
+    {
+      "id": "java-sql-prepare-concat",
+      "language": "java",
+      "source": "connection.prepareStatement(\"SELECT * FROM notes WHERE name=\" + name);",
+      "expected": [
+        "JAVA-SQL"
+      ],
+      "forbidden": [],
+      "note": "Синтаксический сигнал должен сохраняться в этой форме API."
+    },
+    {
+      "id": "java-sql-format",
+      "language": "java",
+      "source": "statement.executeQuery(String.format(\"SELECT * FROM notes WHERE name=%s\", name));",
+      "expected": [
+        "JAVA-SQL"
+      ],
+      "forbidden": [],
+      "note": "Синтаксический сигнал должен сохраняться в этой форме API."
+    },
+    {
+      "id": "java-sql-prepare-safe",
+      "language": "java",
+      "source": "connection.prepareStatement(\"SELECT * FROM notes WHERE name=?\");",
+      "expected": [],
+      "forbidden": [
+        "JAVA-SQL"
+      ],
+      "note": "Эта форма не должна давать указанный сигнал; это не доказательство безопасности всего фрагмента."
+    },
+    {
+      "id": "config-docker-json-priv",
+      "language": "config",
+      "source": "{\"privileged\": true}",
+      "expected": [
+        "CFG-DOCKER-PRIV"
+      ],
+      "forbidden": [],
+      "note": "Синтаксический сигнал должен сохраняться в этой форме API."
+    },
+    {
+      "id": "config-docker-json-safe",
+      "language": "config",
+      "source": "{\"privileged\": false}",
+      "expected": [],
+      "forbidden": [
+        "CFG-DOCKER-PRIV"
+      ],
+      "note": "Эта форма не должна давать указанный сигнал; это не доказательство безопасности всего фрагмента."
+    },
+    {
+      "id": "config-capabilities-json-add",
+      "language": "config",
+      "source": "{\"securityContext\":{\"capabilities\":{\"add\":[\"SYS_ADMIN\"]}}}",
+      "expected": [
+        "CFG-CAPABILITIES"
+      ],
+      "forbidden": [],
+      "note": "Синтаксический сигнал должен сохраняться в этой форме API."
+    },
+    {
+      "id": "config-capabilities-json-drop",
+      "language": "config",
+      "source": "{\"securityContext\":{\"capabilities\":{\"drop\":[\"ALL\"]}}}",
+      "expected": [],
+      "forbidden": [
+        "CFG-CAPABILITIES"
+      ],
+      "note": "Эта форма не должна давать указанный сигнал; это не доказательство безопасности всего фрагмента."
+    },
+    {
+      "id": "config-capabilities-yaml-drop",
+      "language": "config",
+      "source": "capabilities:\n  drop: [ALL]",
+      "expected": [],
+      "forbidden": [
+        "CFG-CAPABILITIES"
+      ],
+      "note": "Эта форма не должна давать указанный сигнал; это не доказательство безопасности всего фрагмента."
+    },
+    {
+      "id": "config-capabilities-drop-then-safe-add",
+      "language": "config",
+      "source": "capabilities:\n  drop: [ALL]\n  add: [NET_BIND_SERVICE]",
+      "expected": [],
+      "forbidden": [
+        "CFG-CAPABILITIES"
+      ],
+      "note": "Эта форма не должна давать указанный сигнал; это не доказательство безопасности всего фрагмента."
+    },
+    {
+      "id": "config-capabilities-drop-then-unsafe-add",
+      "language": "config",
+      "source": "capabilities:\n  drop: [ALL]\n  add: [SYS_ADMIN]",
+      "expected": [
+        "CFG-CAPABILITIES"
+      ],
+      "forbidden": [],
+      "note": "Синтаксический сигнал должен сохраняться в этой форме API."
+    },
+    {
+      "id": "config-pg-trust-json",
+      "language": "config",
+      "source": "{\"POSTGRES_HOST_AUTH_METHOD\": \"trust\"}",
+      "expected": [
+        "CFG-POSTGRES-TRUST"
+      ],
+      "forbidden": [],
+      "note": "Синтаксический сигнал должен сохраняться в этой форме API."
+    },
+    {
+      "id": "config-pg-local-trust",
+      "language": "config",
+      "source": "local all all trust",
+      "expected": [
+        "CFG-POSTGRES-TRUST"
+      ],
+      "forbidden": [],
+      "note": "Синтаксический сигнал должен сохраняться в этой форме API."
+    },
+    {
+      "id": "config-pg-ipv4-netmask",
+      "language": "config",
+      "source": "host all all 127.0.0.1 255.255.255.255 trust",
+      "expected": [
+        "CFG-POSTGRES-TRUST"
+      ],
+      "forbidden": [],
+      "note": "Синтаксический сигнал должен сохраняться в этой форме API."
+    },
+    {
+      "id": "config-pg-gss-trust",
+      "language": "config",
+      "source": "hostgssenc all all 10.0.0.0/24 trust",
+      "expected": [
+        "CFG-POSTGRES-TRUST"
+      ],
+      "forbidden": [],
+      "note": "Синтаксический сигнал должен сохраняться в этой форме API."
+    },
+    {
+      "id": "config-pg-local-peer",
+      "language": "config",
+      "source": "local all all peer",
+      "expected": [],
+      "forbidden": [
+        "CFG-POSTGRES-TRUST"
+      ],
+      "note": "Эта форма не должна давать указанный сигнал; это не доказательство безопасности всего фрагмента."
+    },
+    {
+      "id": "config-redis-reordered",
+      "language": "config",
+      "source": "user default on ~* +@all nopass",
+      "expected": [
+        "CFG-REDIS-ACL"
+      ],
+      "forbidden": [],
+      "note": "Синтаксический сигнал должен сохраняться в этой форме API."
+    },
+    {
+      "id": "config-redis-named-user",
+      "language": "config",
+      "source": "user app nopass ~notes:* +get on",
+      "expected": [
+        "CFG-REDIS-ACL"
+      ],
+      "forbidden": [],
+      "note": "Синтаксический сигнал должен сохраняться в этой форме API."
+    },
+    {
+      "id": "config-redis-password",
+      "language": "config",
+      "source": "user app on >example-only ~notes:* +get",
+      "expected": [],
+      "forbidden": [
+        "CFG-REDIS-ACL"
+      ],
+      "note": "Эта форма не должна давать указанный сигнал; это не доказательство безопасности всего фрагмента."
+    },
+    {
+      "id": "config-redis-off",
+      "language": "config",
+      "source": "user app off nopass ~notes:* +get",
+      "expected": [],
+      "forbidden": [
+        "CFG-REDIS-ACL"
+      ],
+      "note": "Эта форма не должна давать указанный сигнал; это не доказательство безопасности всего фрагмента."
+    },
+    {
+      "id": "php-pdo-exec-is-not-shell",
+      "language": "php",
+      "source": "$pdo->exec(\"CREATE TABLE example (id INT)\");",
+      "expected": [],
+      "forbidden": [
+        "PHP-SHELL"
+      ],
+      "note": "Эта форма не должна давать указанный сигнал; это не доказательство безопасности всего фрагмента."
+    },
+    {
+      "id": "php-pdo-spaced-exec-is-not-shell",
+      "language": "php",
+      "source": "$pdo -> exec(\"CREATE TABLE example (id INT)\");",
+      "expected": [],
+      "forbidden": [
+        "PHP-SHELL"
+      ],
+      "note": "Эта форма не должна давать указанный сигнал; это не доказательство безопасности всего фрагмента."
+    },
+    {
+      "id": "php-proc-open-explicit-shell",
+      "language": "php",
+      "source": "proc_open([\"/bin/sh\", \"-c\", $command], $descriptors, $pipes);",
+      "expected": [
+        "PHP-SHELL"
+      ],
+      "forbidden": [],
+      "note": "Синтаксический сигнал должен сохраняться в этой форме API."
+    },
+    {
+      "id": "go-query-second-argument-is-data",
+      "language": "go",
+      "source": "db.Query(\"SELECT * FROM notes WHERE name=$1\", \"prefix-\" + name)",
+      "expected": [],
+      "forbidden": [
+        "GO-SQL"
+      ],
+      "note": "Эта форма не должна давать указанный сигнал; это не доказательство безопасности всего фрагмента."
+    },
+    {
+      "id": "java-query-placeholder-formatting-data",
+      "language": "java",
+      "source": "q.setString(1, String.format(\"%s\", name));",
+      "expected": [],
+      "forbidden": [
+        "JAVA-SQL"
+      ],
+      "note": "Эта форма не должна давать указанный сигнал; это не доказательство безопасности всего фрагмента."
+    },
+    {
+      "id": "config-capabilities-block-add",
+      "language": "config",
+      "source": "capabilities:\n  drop:\n    - ALL\n  add:\n    - SYS_ADMIN",
+      "expected": [
+        "CFG-CAPABILITIES"
+      ],
+      "forbidden": [],
+      "note": "Синтаксический сигнал должен сохраняться в этой форме API."
+    },
+    {
+      "id": "config-capabilities-block-drop",
+      "language": "config",
+      "source": "capabilities:\n  drop:\n    - ALL",
+      "expected": [],
+      "forbidden": [
+        "CFG-CAPABILITIES"
+      ],
+      "note": "Эта форма не должна давать указанный сигнал; это не доказательство безопасности всего фрагмента."
+    },
+    {
+      "id": "js-import-alias-distant-call",
+      "language": "javascript",
+      "source": "import {exec as run} from 'child_process';\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nrun(command);",
+      "expected": [
+        "JS-SHELL"
+      ],
+      "forbidden": [],
+      "note": "Синтаксический сигнал должен сохраняться в этой форме API."
+    },
+    {
+      "id": "js-query-second-argument-is-data",
+      "language": "javascript",
+      "source": "db.query(\"SELECT * FROM notes WHERE name=?\", [\"prefix-\" + name]);",
+      "expected": [],
+      "forbidden": [
+        "JS-SQL"
+      ],
+      "note": "Эта форма не должна давать указанный сигнал; это не доказательство безопасности всего фрагмента."
+    },
+    {
+      "id": "php-query-escaped-dollar",
+      "language": "php",
+      "source": "$db->query(\"SELECT '\\$literal'\");",
+      "expected": [],
+      "forbidden": [
+        "PHP-SQL"
+      ],
+      "note": "Эта форма не должна давать указанный сигнал; это не доказательство безопасности всего фрагмента."
+    },
+    {
+      "id": "java-prepare-option-is-not-sql",
+      "language": "java",
+      "source": "statement.execute(\"INSERT INTO events DEFAULT VALUES\", new String[]{\"prefix-\" + name});",
+      "expected": [],
+      "forbidden": [
+        "JAVA-SQL"
+      ],
+      "note": "SQL text is fixed; generated-column identifiers require their own allowlist and are outside this rule."
+    }
+  ]
+}

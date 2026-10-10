@@ -1,0 +1,12 @@
+{
+  "files": [
+    {
+      "path": "service.json",
+      "allow": [
+        ["service", "name"],
+        ["http", "port"],
+        ["logging", "level"]
+      ]
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "schema": "durkahelper.validation-record.v1",
+  "id": "validation-redacted-0001",
+  "timestamp": "2026-01-01T00:03:00Z",
+  "check": "evidence_export",
+  "status": "partial",
+  "summary": "Synthetic validation retained only redacted evidence.",
+  "evidence": [
+    "lab/fixtures/defense_ops/event.redacted.json"
+  ],
+  "attributes": {
+    "inspected_events": 1,
+    "redacted": true,
+    "retained_detail": "[REDACTED]"
+  }
+}
